@@ -19,7 +19,7 @@ int main(void) {
 
     return 0;
 }
-
+//Eivind er kul
 // ^= er xor
 // |= er or
 // &= er and antar jeg
