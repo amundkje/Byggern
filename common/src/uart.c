@@ -1,5 +1,5 @@
 // uart.c
-
+#include <stdbool.h>
 #include <avr/io.h>
 #include "../include/uart.h"
 
@@ -23,22 +23,129 @@ void uart_init(void) {
 }
 
 
-
-void uart_transmit(unsigned char data) {
+/**
+ * Transmit function for sending data over UART.
+ * 
+ * @param data The value to be transmitted, not the pointer/address.
+ * @return None
+ * 
+ * @note
+ * UDRE0: USART Data Register Empty 
+ * This flag is set when the transmit buffer is empty and can accept new data.
+ * Should be checked BEFORE the uart_transmit() function is called to ensure 
+ * that the buffer is ready to accept new data. 
+ * -- Otherwise it will hold the program until the buffer is ready.
+ */
+void uart_transmit(unsigned char value) {
 
     /* Wait for empty transmit buffer */
     while ( !( UCSR0A & (1<<UDRE0)) )
-    ; //HOLD
+    ; //HOLD 
 
-    /* Put data into buffer, sends the data */
-    UDR0 = data;
+    //TODO: add interupt.
+
+    // ------------ 
+
+    /* Put data into buffer, which sends the data */
+    UDR0 = value; //Buffer becomes empty when data is sendt, repeats..
 }
 
+/**
+ * Uses the uart_transmit() function to send a string of characters over UART.
+ *
+ * @param str The null-terminated string to be transmitted.
+ * @return None
+ * @note This function will transmit each character in the string one by one
+ * 
+ * @ uart_transmit() for details on how the transmission is handled.
+ */
+void uart_transmit_string(const char *str) {
+
+    while (*str) { 
+        uart_transmit(*str++);
+    }
+}
+
+
+/**
+ * Receive function for receiving data over UART.
+ * 
+ * @note This function will hold the program until data is received, and then return the value.
+ */
 unsigned char uart_receive(void) {
 
     /* Wait for data to be received */
     while ( !(UCSR0A & (1<<RXC0)) )
-        ;
+    ;
     /* Get and return received data from buffer */
     return UDR0;
+    }
+
+    /*
+    * Receive function for receiving data over UART without blocking the program.
+    * If no data is available for reception, the function will return 0.
+    */
+   
+   bool uart_receive_nonblocking(unsigned char *buffer) {
+    if (UCSR0A & (1<<RXC0)) {
+        buffer[0] = UDR0;
+        return true; // UDR0; // Return received data
+    } else {
+        return false; // No data received
+    }
+}
+
+
+/**
+ * Receive function for receiving a string of characters over UART.
+ * Will hold the program until 1 or more criterias are met:
+ * 1. A newline character is received.
+ * 2. A carriage return character is received.
+ * 3. The maximum length of the string is reached.
+ * 4. The null terminator is received.
+ * 5. The uart_receive_nonblocking() function returns false, indicating no more data is available.
+ * 
+ * @param buffer The buffer where the received string will be stored.
+ * @param max_length The maximum, including the null terminator. 
+ * A value greater than 1 is required for retrieval to work.
+ * @return The number of characters received,
+ * 
+ * @note If the maximum length is less than 2, the function will return 0, indicating that there is not enough space for a null terminator.
+ * This is to ensure that the received string can be properly null-terminated.
+ * 
+ * This function uses uart_receive_nonblocking() to receive characters one by one.
+ * 
+ */
+unsigned char uart_receive_string(
+    char *buffer,
+     unsigned char max_length
+    ) {
+    unsigned char i = 0;
+    unsigned char received_char;
+    bool receive_status;
+
+
+    if (max_length < 2) { // See docs!!
+        buffer[0] = '\0'; // Null-terminate the string to avoid undefined behavior
+        return 0; // Not enough space for a null terminator
+    } 
+
+
+    while (i < max_length - 1) { // -1 for null terminator
+        receive_status = uart_receive_nonblocking(&received_char);
+        if (!receive_status) {
+            break; // No data received, exit the loop!
+        }
+
+        
+        
+        // Check for newline or carriage return:
+        if (received_char == '\n' || received_char == '\r' || received_char == '\0') { 
+            break; // Exit the loop if newline, carriage return.
+        }
+        buffer[i++] = received_char;
+    }
+
+    buffer[i] = '\0'; // Null-terminate the string before returning..
+    return i; // Return the number of characters received
 }
