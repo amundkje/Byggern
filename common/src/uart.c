@@ -1,5 +1,4 @@
 // uart.c
-#include <stdbool.h>
 #include <avr/io.h>
 #include "../include/uart.h"
 
@@ -86,12 +85,12 @@ unsigned char uart_receive(void) {
     * If no data is available for reception, the function will return 0.
     */
    
-   bool uart_receive_nonblocking(unsigned char *buffer) {
+int uart_receive_nonblocking(unsigned char *buffer) {
     if (UCSR0A & (1<<RXC0)) {
         buffer[0] = UDR0;
-        return true; // UDR0; // Return received data
+        return 1; // UDR0; // Return received data
     } else {
-        return false; // No data received
+        return 0; // No data received
     }
 }
 
@@ -106,7 +105,7 @@ unsigned char uart_receive(void) {
  * 5. The uart_receive_nonblocking() function returns false, indicating no more data is available.
  * 
  * @param buffer The buffer where the received string will be stored.
- * @param max_length The maximum, including the null terminator. 
+ * @param max_length The maximum length of the buffer array, including the null terminator. 
  * A value greater than 1 is required for retrieval to work.
  * @return The number of characters received,
  * 
@@ -120,9 +119,10 @@ unsigned char uart_receive_string(
     char *buffer,
      unsigned char max_length
     ) {
-    unsigned char i = 0;
+    unsigned char current_length = 0;
+
     unsigned char received_char;
-    bool receive_status;
+    int received_status;
 
 
     if (max_length < 2) { // See docs!!
@@ -131,9 +131,9 @@ unsigned char uart_receive_string(
     } 
 
 
-    while (i < max_length - 1) { // -1 for null terminator
-        receive_status = uart_receive_nonblocking(&received_char);
-        if (!receive_status) {
+    while (current_length < max_length - 1) { // -1 for null terminator
+        received_status = uart_receive_nonblocking(&received_char);
+        if (!received_status) {
             break; // No data received, exit the loop!
         }
 
@@ -143,9 +143,11 @@ unsigned char uart_receive_string(
         if (received_char == '\n' || received_char == '\r' || received_char == '\0') { 
             break; // Exit the loop if newline, carriage return.
         }
-        buffer[i++] = received_char;
+
+        // INCREMENTING!!
+        buffer[current_length++] = received_char; 
     }
 
-    buffer[i] = '\0'; // Null-terminate the string before returning..
-    return i; // Return the number of characters received
+    buffer[current_length] = '\0'; // Null-terminate the string before returning..
+    return current_length; // Return the number of characters received
 }

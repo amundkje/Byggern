@@ -8,7 +8,7 @@ void uart_transmit_string(const char *str);
 
 unsigned char uart_receive_string(char *buffer, unsigned char max_length);
 void uart_receive_string_blocking(char *buffer, unsigned char max_length);
-bool uart_receive_nonblocking(unsigned char *buffer);
+int uart_receive_nonblocking(unsigned char *buffer);
 unsigned char uart_receive(void); //Old function, blocking receive.
 
 #endif
