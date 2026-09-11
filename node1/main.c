@@ -1,13 +1,14 @@
+#include <stdint.h>
+// #include <delay.h>
+#include <stdio.h>
+
 #include "../common/include/uart.h"
+#include "../sandbox/sram_test.c"
 #include <avr/io.h> 
 
 
 #define F_CPU 4915200UL // Clock Speed
 #define BUFFER_SIZE 255
-
-// #include <delay.h>
-#include <stdio.h>
-
 
 
 
@@ -17,6 +18,7 @@ void test_micro_with_pin(void) {
     PORTC |= (1 << PC0);  
 
 }
+
 
 /*
 * Can be used to test the UART's receive and transmit functions.
@@ -47,9 +49,11 @@ void test_transmit_receive() {
     }
 }
 
+
 void init() {
     stdout = fdevopen(uart_putchar, uart_getchar);  
 }
+
 
 /**
  * Main function for the Node1 application.
@@ -62,9 +66,10 @@ int main(void) {
     init();
     uart_init();
     
+    SRAM_test(); // sram testfile from assignment
     
     // test_transmit_receive();
-    print("\n\r");
+    printf("\n\r");
     printf("Hello There\n\r");
     printf("GENERAL KENOBI!!");
    
