@@ -1,6 +1,8 @@
 // uart.h
 #ifndef UART_H
 #define UART_H
+#include <stdio.h>
+
 
 void uart_init(void);
 void uart_transmit(unsigned char data);
@@ -10,5 +12,8 @@ unsigned char uart_receive_string(char *buffer, unsigned char max_length);
 void uart_receive_string_blocking(char *buffer, unsigned char max_length);
 int uart_receive_nonblocking(unsigned char *buffer);
 char uart_receive(void); //Old function, blocking receive.
+
+int uart_putchar(char c, FILE *stream);
+int uart_getchar(FILE *stream);
 
 #endif

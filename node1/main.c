@@ -1,10 +1,14 @@
 #include "../common/include/uart.h"
 #include <avr/io.h> 
 
+
 #define F_CPU 4915200UL // Clock Speed
 #define BUFFER_SIZE 255
 
 // #include <delay.h>
+#include <stdio.h>
+
+
 
 
 void test_micro_with_pin(void) {
@@ -43,6 +47,10 @@ void test_transmit_receive() {
     }
 }
 
+void init() {
+    stdout = fdevopen(uart_putchar, uart_getchar);  
+}
+
 /**
  * Main function for the Node1 application.
  *
@@ -51,11 +59,14 @@ void test_transmit_receive() {
  * @return 0 on successful execution.
  */
 int main(void) {
-
+    init();
     uart_init();
     
-    test_transmit_receive();
     
+    // test_transmit_receive();
+    print("\n\r");
+    printf("Hello There\n\r");
+    printf("GENERAL KENOBI!!");
    
 
 

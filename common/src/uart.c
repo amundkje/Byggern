@@ -3,6 +3,7 @@
 
 #define F_CPU 4915200UL // Clock Speed
 
+#include <stdio.h>
 #include <avr/io.h>
 #include "../include/uart.h"
 
@@ -10,7 +11,7 @@
 #define UBRR_VALUE ((F_CPU / 16UL / BAUD) - 1) //UL = Unsigned Long: Unsigned meaning n >= 0, and Long meaning 32bit
 
 
-// U
+// 
 void uart_init(void) {
 
     /* Set baud rate registers*/
@@ -23,6 +24,14 @@ void uart_init(void) {
     /* Set frame format: 8data, 2stop bit */
     UCSR1C = (1<<URSEL0)|(1<<USBS0)|(3<<UCSZ00);
 }
+
+
+
+
+
+
+
+
 
 
 /**
@@ -99,6 +108,8 @@ int uart_receive_nonblocking(unsigned char *buffer) {
 }
 
 
+
+
 /**
  * Receive function for receiving a string of characters over UART.
  * Will hold the program until 1 or more criterias are met:
@@ -155,4 +166,19 @@ unsigned char uart_receive_string(
 
     buffer[current_length] = '\0'; // Null-terminate the string before returning..
     return current_length; // Return the number of characters received
+}
+
+
+//FOR FDEVOPEN:
+
+// Can include validation with int return in later version.
+int uart_putchar(char c, FILE *stream) {
+    uart_transmit(c);
+    return 0;
+}
+
+// stream is for later usage.
+int uart_getchar(FILE *stream) {
+    return uart_receive();
+
 }
