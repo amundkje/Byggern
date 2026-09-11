@@ -1,10 +1,13 @@
 // uart.c
+
+
+#define F_CPU 4915200UL // Clock Speed
+
 #include <avr/io.h>
 #include "../include/uart.h"
 
-#define clock_frequency 4915200// Clock Speed
 #define BAUD 9600
-#define UBRR_VALUE ((clock_frequency / 16UL / BAUD) - 1) //UL = Unsigned Long: Unsigned meaning n >= 0, and Long meaning 32bit
+#define UBRR_VALUE ((F_CPU / 16UL / BAUD) - 1) //UL = Unsigned Long: Unsigned meaning n >= 0, and Long meaning 32bit
 
 
 // U
@@ -71,11 +74,12 @@ void uart_transmit_string(const char *str) {
  * 
  * @note This function will hold the program until data is received, and then return the value.
  */
-unsigned char uart_receive(void) {
+char uart_receive(void) {
+
 
     /* Wait for data to be received */
     while ( !(UCSR0A & (1<<RXC0)) )
-    ;
+   ;
     /* Get and return received data from buffer */
     return UDR0;
     }
@@ -116,6 +120,7 @@ int uart_receive_nonblocking(unsigned char *buffer) {
  * 
  */
 unsigned char uart_receive_string(
+
     char *buffer,
      unsigned char max_length
     ) {
