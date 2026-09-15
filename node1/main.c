@@ -3,7 +3,12 @@
 #include <stdio.h>
 
 #include "../common/include/uart.h"
+
+#include "../common/include/sram.h"
+#include "../common/src/sram.c"
+
 #include "../sandbox/sram_test.c"
+
 #include <avr/io.h> 
 
 
@@ -13,7 +18,7 @@
 
 
 void test_micro_with_pin(void) {
-    // Set PA0 as output
+    // Set PC0 as output
     DDRC |= (1 << PC0);
     PORTC |= (1 << PC0);  
 
@@ -64,14 +69,23 @@ void init() {
  */
 int main(void) {
     init();
-    uart_init();
+
+   
+    sram_init();
+
+
+    //latch_switch(1);
     
+    uart_init();
+
+
+    printf("\n\r");
+    printf("Hello There\n\r");
+    printf("GENERAL KENOBI!!\n\n\r");
+   
     SRAM_test(); // sram testfile from assignment
     
     // test_transmit_receive();
-    printf("\n\r");
-    printf("Hello There\n\r");
-    printf("GENERAL KENOBI!!");
    
 
 
