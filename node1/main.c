@@ -68,30 +68,25 @@ void init() {
  * @return 0 on successful execution.
  */
 int main(void) {
+
+    // Initialization:
     init();
-
-   
+    adc_clk_init();
     sram_init();
-
-
-    //latch_switch(1);
-    
     uart_init();
+    
 
-
+    // One time code:
     printf("\n\r");
     printf("Hello There\n\r");
     printf("GENERAL KENOBI!!\n\n\r");
-   
-    SRAM_test(); // sram testfile from assignment
-    
-    // test_transmit_receive();
-   
 
 
-
-    //const char *test_string = "Hello from the other side!\n";
-    //uart_transmit_string(test_string);
+    // Loop:
+    while(1) {
+        // Loop code:
+        
+    };
 
     return 0;
 }
