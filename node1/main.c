@@ -30,16 +30,29 @@ volatile char* ext_adc = (volatile char*) 0x1000; // ADC address pointer
 void adc_test(void) {
     printf("ADC test begun\n\r");
 
+    volatile uint8_t* adc_ch0 = ext_adc;
+    volatile uint8_t* adc_ch1 = ext_adc + 0x01;
+    volatile uint8_t* adc_ch2 = ext_adc + 0x02;
+    volatile uint8_t* adc_ch3 = ext_adc + 0x03;
+
     while (1) {
 
-        *ext_adc = 0x00;
+        *adc_ch0 = 0x00;
+        _delay_us(10);
+        uint8_t adc_value_ch0 = *adc_ch0;
+        printf("ADC ch0 value: %d \n\r", adc_value_ch0);
 
         _delay_us(10);
+        uint8_t adc_value_ch1 = *adc_ch1;
+        printf(" ADC ch1 value: %d \n\r", adc_value_ch1);
 
-        uint8_t adc_value = *ext_adc;
-        
+        _delay_us(10);
+        uint8_t adc_value_ch2 = *adc_ch2;
+        printf("   ADC ch2 value: %d \n\r", adc_value_ch2);
 
-        printf("ADC ch0 value: %d \n\r", adc_value);
+        _delay_us(10);
+        uint8_t adc_value_ch3 = *adc_ch3;
+        printf("    ADC ch3 value: %d \n\r", adc_value_ch3);
 
         _delay_ms(500);
         
