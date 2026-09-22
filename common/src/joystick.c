@@ -38,27 +38,26 @@ struct Directional_power{
     int Down;
     int Left;
     int Right;
+    int Nutral
 };
 void joystick_structxy(struct Directional_power *D, int power_x, int power_y) {
-    if (power_x <= min_mid_x) {
-        new_power_x = 100-power_x;
-        D->Left = new_power_x;        // joystick powers logic Left Right
-    } else if (power_x <= max_mid_x){ // gives 0-100 output for motors
-        D->Left = 0;                  // Low volt is inversed to correct.. 
-        D->Right = 0;                 // powervalues in opposite direction
-    } else if (power_x >= max_mid_x){
+    if (power_x <= min_mid_x) {       // joystick powers logic Left Right
+        new_power_x = 100-power_x;    // gives 0-100 output for motors
+        D->Left = new_power_x;        // Low volt is inversed to correct.. 
+    } else if (power_x >= max_mid_x){ // powervalues in opposite direction
         D->Right = power_x;
-    } 
+    } else {
+        D->Neutral = 1;
+    }
     
     if (power_y <= min_mid_y){        // The same for y direction Up down 
         new_power_y= 100-power_y;
         D->Down = new_power_y;
-    } else if (power_y <= max_mid_y){
-        D->Down = 0;
-        D->Up = 0;
     } else if (power_y >= max_mid_y){
         D->Up = power_y;
-    } 
+    } else {
+        D->Neutral = 1;
+    }
     return D;
 }
 
@@ -72,7 +71,7 @@ struct joystick_get_position(void) {
 
 /*
 // Take in position and return a enumerated direction.
-// {NUTRAL, RIGHT, LEFT, UP, DOWN}
+// {NEUTRAL, RIGHT, LEFT, UP, DOWN}
 //TODO lag en god beskrivelse av funksjonen.
 enum joystick_get_direction(struct *position) {
 
