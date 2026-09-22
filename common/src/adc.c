@@ -28,5 +28,5 @@ void adc_clk_init(void) {
 
 
 void adc_read(void) {
-//x,y og y return takk ;)
+//x,y return takk ;)
 };
