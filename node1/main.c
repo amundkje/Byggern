@@ -1,22 +1,54 @@
+// Includes
 #include <stdint.h>
-// #include <delay.h>
 #include <stdio.h>
-
-#include "../common/include/uart.h"
-
-#include "../common/include/sram.h"
-#include "../common/src/sram.c"
-
-#include "../sandbox/sram_test.c"
-
+//#include <delay.h>
 #include <avr/io.h> 
 
 
+// Include self made files
+#include "../common/include/uart.h"
+#include "../common/include/sram.h"
+#include "../common/include/adc.h"
+#include "../common/include/joystick.h"
+
+#include "../common/src/sram.c"
+#include "../common/src/adc.c"
+#include "../sandbox/sram_test.c"
+
+
+// Defines
 #define F_CPU 4915200UL // Clock Speed
 #define BUFFER_SIZE 255
 
+#include <util/delay.h> // Must be after define F_CPU 
+
+// Global variables
+volatile char* ext_adc = (volatile char*) 0x1000; // ADC address pointer
 
 
+// Test adc
+void adc_test(void) {
+    printf("ADC test begun\n\r");
+
+    while (1) {
+
+        *ext_adc = 0x00;
+
+        _delay_us(10);
+
+        uint8_t adc_value = *ext_adc;
+        
+
+        printf("ADC ch0 value: %d \n\r", adc_value);
+
+        _delay_ms(500);
+        
+    }
+    return;
+}
+
+
+// Simple test to set a pin high
 void test_micro_with_pin(void) {
     // Set PC0 as output
     DDRC |= (1 << PC0);
@@ -54,7 +86,7 @@ void test_transmit_receive() {
     }
 }
 
-
+// Initialize stdout
 void init() {
     stdout = fdevopen(uart_putchar, uart_getchar);  
 }
@@ -81,6 +113,7 @@ int main(void) {
     printf("Hello There\n\r");
     printf("GENERAL KENOBI!!\n\n\r");
 
+    adc_test();
 
     // Loop:
     while(1) {
