@@ -1,5 +1,5 @@
 # List all source files to be compiled; separate with space
-SOURCE_FILES := node1/main.c
+SOURCE_FILES := node1/main.c $(wildcard common/src/*.c)
 
 
 INCLUDES = -I/usr/avr/include
@@ -19,7 +19,7 @@ TARGET_CPU := atmega162
 TARGET_DEVICE := m162
 
 CC := avr-gcc
-CFLAGS := -O -std=c11 -mmcu=$(TARGET_CPU) -ggdb $(INCLUDES)
+CFLAGS := -O -std=c11 -mmcu=$(TARGET_CPU) -ggdb $(INCLUDES) -DF_CPU=4915200UL
 
 OBJECT_FILES = $(SOURCE_FILES:%.c=$(BUILD_DIR)/%.o)
 

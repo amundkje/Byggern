@@ -1,6 +1,5 @@
 
 
-#define F_CPU 4915200UL // Clock Speed
 
 // Lib. Includes
 #include <stdint.h>
