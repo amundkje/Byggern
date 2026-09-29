@@ -1,8 +1,8 @@
 # List all source files to be compiled; separate with space
 SOURCE_FILES := node1/main.c $(wildcard common/src/*.c)
 
+INCLUDES = -I/usr/avr/include -Icommon/include -Inode1
 
-INCLUDES = -I/usr/avr/include
 
 
 # Set this flag to "yes" (no quotes) to use JTAG; otherwise ISP (SPI) is used

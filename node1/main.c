@@ -9,10 +9,11 @@
 
 
 // Custom Drivers
-#include "../common/include/uart.h"
-#include "../common/include/sram.h"
-#include "../common/include/adc.h"
-#include "../common/include/joystick.h"
+#include "joystick.h"
+#include "uart.h"
+#include "sram.h"
+#include "adc.h"
+#include "spi.h"
 
 
 // User Definitions
@@ -63,6 +64,11 @@ void test_transmit_receive() {
 // Initialize stdout
 void init() {
     stdout = fdevopen(uart_putchar, uart_getchar);  
+
+    // Initialise other modules:
+    adc_clk_init();
+    sram_init();
+    uart_init();
 }
 
 
@@ -75,11 +81,9 @@ void init() {
  */
 int main(void) {
 
-    // Initialization:
+    // Init --Please dont but anything above :)
     init();
-    adc_clk_init();
-    sram_init();
-    uart_init();
+    
     
 
     // One time code:
