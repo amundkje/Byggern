@@ -11,6 +11,7 @@ void joystick_calibratey(unsigned int y);
 void joystick_updatex(unsigned int *x);
 void joystick_updatey(unsigned int *y);
 void joystick_structxy(struct Directional_power *D, int power_x, int power_y)
+const char *joystick_directional_struct(struct Directional_power *P, enum select, unsigned int x, unsigned int y, int Deadzone)
 //struct joystick_get_position(void);
 //enum joystick_get_direction(struct *position);
 
