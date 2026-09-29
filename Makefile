@@ -1,5 +1,5 @@
 # List all source files to be compiled; separate with space
-SOURCE_FILES := node1/main.c common/src/uart.c
+SOURCE_FILES := node1/main.c
 
 
 INCLUDES = -I/usr/avr/include

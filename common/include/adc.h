@@ -5,6 +5,6 @@
 void adc_clk_init(void);
 
 void adc_read(void);
-
+void adc_test(void);
 
 #endif
