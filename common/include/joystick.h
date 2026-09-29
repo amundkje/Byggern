@@ -1,22 +1,25 @@
-<<<<<<< HEAD
 #ifndef JOYSTICK_H
 #define JOYSTICK_H
-#include <stdio.h>
 
-// Uncomment when used:
 
-/*
-void joystick_calibratex(unsigned int x);
-void joystick_calibratey(unsigned int y);
-*/
-void joystick_updatex(unsigned int *x);
-void joystick_updatey(unsigned int *y);
-void joystick_structxy(struct Directional_power *D, int power_x, int power_y)
-const char *joystick_directional_struct(struct Directional_power *P, enum select, unsigned int x, unsigned int y, int Deadzone)
-//struct joystick_get_position(void);
-//enum joystick_get_direction(struct *position);
+#include "global_structs.h"
+
+
+
+void joystick_init();
+
+void __default_normalisation();
+
+void joystick_update_normalisation(
+    uint8_t min_value_x, uint8_t max_value_x,
+    uint8_t min_value_y, uint8_t max_value_y,
+    uint8_t outer_margin, uint8_t deadzone);
+
+
+xy_signed joystick_normalise_input(xy_unsigned pos_xy);
+
+directional_pos joystick_get_directional(int8_t x, int8_t y);
+
+
 
 #endif
-=======
-// Temp. stashed, will be recommited in the future.
->>>>>>> 380b85f0d2ef62a2a75fc1e1cab35bb2d650ac59

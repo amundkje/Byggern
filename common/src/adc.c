@@ -6,7 +6,7 @@
 
 
 
-// Macro definition "the byte stored at, treated as volatile uint8_t"
+// Macro definition "the byte stored at, treated as volatile"
 #define ADC_JOYSTICK_X (*(volatile uint8_t *)0x1000) // AIN0 
 #define ADC_JOYSTICK_Y (*(volatile uint8_t *)0x1001) // AIN1
 #define ADC_TOUCH_X    (*(volatile uint8_t *)0x1002) // AIN2
@@ -37,8 +37,6 @@ void adc_clk_init(void) {
 };
 
 
-
-
 /**
  * Overwrites 0x1000 addr of adc, to initiate new read.
  */
@@ -47,13 +45,12 @@ void adc_reset_read(void){
 }
 
 
- 
 /**
  * Reads current ADC values into a positional matrix
  * @return filled positional matrix.
  */
-pos_2D adc_read(void) {   
-    pos_2D input_state_t;
+pos_2D_unsigned adc_read(void) {   
+    pos_2D_unsigned input_state_t;
 
     adc_reset_read(); //Read new values.
     _delay_us(10); //µs is needed for ADC to process.
@@ -63,8 +60,6 @@ pos_2D adc_read(void) {
     input_state_t.touch.x = ADC_TOUCH_X;
     input_state_t.touch.y = ADC_TOUCH_Y;
 
-
-    
     return input_state_t;
 };
 
@@ -75,7 +70,7 @@ void adc_test(void) {
 
     while (1) {
 
-        pos_2D pos;
+        pos_2D_unsigned pos;
         pos = adc_read();
         
         

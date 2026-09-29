@@ -14,12 +14,37 @@
 #include "sram.h"
 #include "adc.h"
 #include "spi.h"
-
+#include "global_structs.h"
 
 // User Definitions
 #define BUFFER_SIZE 255 
 
 // Please do not break the code :)
+
+
+
+
+// Initialize stdout
+void init() {
+    stdout = fdevopen(uart_putchar, uart_getchar);  
+
+    // Initialise other modules:
+    sram_init(); // MUST BE BEFORE ANY MEMORY USERS!
+
+    adc_clk_init(); // MUST BE AFTER SRAM.
+
+    uart_init();
+}
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -61,15 +86,58 @@ void test_transmit_receive() {
     }
 }
 
-// Initialize stdout
-void init() {
-    stdout = fdevopen(uart_putchar, uart_getchar);  
 
-    // Initialise other modules:
-    adc_clk_init();
-    sram_init();
-    uart_init();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void test_joystick_normalisation() {
+    // stick is already initialised.
+    
+    pos_2D_unsigned analog_pos;
+    xy_signed norm_pos;
+    directional_pos scaled_pos;
+    printf("Initiating analog test....");
+    while (1)
+    {   
+        analog_pos = adc_read();
+        // printf("\n\r");
+        // printf("READ ANALOG: \n\r");
+        // printf("X: %d \n\r",analog_pos.joystick.x);
+        // printf("Y: %d \n\r",analog_pos.joystick.y);
+        // printf("------------A END--------------\n\r");
+        _delay_ms(100);
+    
+
+        norm_pos = joystick_normalise_input(analog_pos.joystick);
+        // printf("NORMALISED: \n\r");
+        // printf("X: %d \n\r",norm_pos.x);
+        // printf("Y: %d \n\r",norm_pos.y);
+        // printf("------------NORM END---------------\n\r");
+        // _delay_ms(100);
+
+        scaled_pos = joystick_get_directional(norm_pos.x,norm_pos.y);
+
+         printf("up=%d down=%d left=%d right=%d neutral=%d \n\r",
+           scaled_pos.up, scaled_pos.down,
+            scaled_pos.left, scaled_pos.right, scaled_pos.neutral);
+        
+    }
 }
+
+
+
+
 
 
 /**
@@ -84,19 +152,21 @@ int main(void) {
     // Init --Please dont but anything above :)
     init();
     
-    
 
-    // One time code:
+
+    // One time code, to see system start.:
     printf("\n\r");
     printf("Hello There\n\r");
     printf("GENERAL KENOBI!!\n\n\r");
+    
+    joystick_init(); // currently uses default values.
 
-    adc_test();
+    // adc_test();
+    test_joystick_normalisation();
 
     // Loop:
     while(1) {
-        // Loop code:
-        
+        // Hold code;
     };
 
     return 0;

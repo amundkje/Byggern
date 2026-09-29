@@ -1,27 +1,16 @@
 #ifndef ADC_H
 #define ADC_H
 
-#include <stdint.h> //Used for uint8_t
+#include <stdint.h> //Used for *int8_t
+#include "global_structs.h"
 
-typedef struct {
-    uint8_t x;
-    uint8_t y;
-}joystick_xy;
-
-typedef struct {
-    uint8_t x;
-    uint8_t y;
-}touch_xy;
-
-typedef struct {
-    joystick_xy joystick;
-    touch_xy touch;
-} pos_2D;
 
 void adc_clk_init(void);
-pos_2D adc_read(void);
+/**
+ * Reads the analog input from both joystick and touchpad.
+ * @return an unsigned struct.
+ */
+pos_2D_unsigned adc_read(void);
 void adc_test(void);
-
-
 
 #endif
