@@ -1,8 +1,8 @@
 # List all source files to be compiled; separate with space
-SOURCE_FILES := node1/main.c common/src/uart.c
+SOURCE_FILES := node1/main.c $(wildcard common/src/*.c)
 
+INCLUDES = -I/usr/avr/include -Icommon/include -Inode1
 
-INCLUDES = -I/usr/avr/include
 
 
 # Set this flag to "yes" (no quotes) to use JTAG; otherwise ISP (SPI) is used
@@ -19,7 +19,7 @@ TARGET_CPU := atmega162
 TARGET_DEVICE := m162
 
 CC := avr-gcc
-CFLAGS := -O -std=c11 -mmcu=$(TARGET_CPU) -ggdb $(INCLUDES)
+CFLAGS := -O -std=c11 -mmcu=$(TARGET_CPU) -ggdb $(INCLUDES) -DF_CPU=4915200UL
 
 OBJECT_FILES = $(SOURCE_FILES:%.c=$(BUILD_DIR)/%.o)
 

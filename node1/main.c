@@ -1,64 +1,29 @@
-// Includes
+
+
+
+// Lib. Includes
 #include <stdint.h>
 #include <stdio.h>
-//#include <delay.h>
 #include <avr/io.h> 
-
-
-// Include self made files
-#include "../common/include/uart.h"
-#include "../common/include/sram.h"
-#include "../common/include/adc.h"
-#include "../common/include/joystick.h"
-
-#include "../common/src/sram.c"
-#include "../common/src/adc.c"
-#include "../sandbox/sram_test.c"
-
-
-// Defines
-#define F_CPU 4915200UL // Clock Speed
-#define BUFFER_SIZE 255
-
 #include <util/delay.h> // Must be after define F_CPU 
 
-// Global variables
-volatile char* ext_adc = (volatile char*) 0x1000; // ADC address pointer
+
+// Custom Drivers
+#include "joystick.h"
+#include "uart.h"
+#include "sram.h"
+#include "adc.h"
+#include "spi.h"
 
 
-// Test adc
-void adc_test(void) {
-    printf("ADC test begun\n\r");
+// User Definitions
+#define BUFFER_SIZE 255 
 
-    volatile uint8_t* adc_ch0 = ext_adc;
-    volatile uint8_t* adc_ch1 = ext_adc + 0x01;
-    volatile uint8_t* adc_ch2 = ext_adc + 0x02;
-    volatile uint8_t* adc_ch3 = ext_adc + 0x03;
+// Please do not break the code :)
 
-    while (1) {
 
-        *adc_ch0 = 0x00;
-        _delay_us(10);
-        uint8_t adc_value_ch0 = *adc_ch0;
-        printf("ADC ch0 value: %d \n\r", adc_value_ch0);
 
-        _delay_us(10);
-        uint8_t adc_value_ch1 = *adc_ch1;
-        printf(" ADC ch1 value: %d \n\r", adc_value_ch1);
 
-        _delay_us(10);
-        uint8_t adc_value_ch2 = *adc_ch2;
-        printf("   ADC ch2 value: %d \n\r", adc_value_ch2);
-
-        _delay_us(10);
-        uint8_t adc_value_ch3 = *adc_ch3;
-        printf("    ADC ch3 value: %d \n\r", adc_value_ch3);
-
-        _delay_ms(500);
-        
-    }
-    return;
-}
 
 
 // Simple test to set a pin high
@@ -87,9 +52,6 @@ void test_transmit_receive() {
 
     while (1)
     {   
-
-        
-        
         // uart_transmit(uart_receive());
 
         uart_receive_string(buffer, BUFFER_SIZE);
@@ -102,6 +64,11 @@ void test_transmit_receive() {
 // Initialize stdout
 void init() {
     stdout = fdevopen(uart_putchar, uart_getchar);  
+
+    // Initialise other modules:
+    adc_clk_init();
+    sram_init();
+    uart_init();
 }
 
 
@@ -114,11 +81,9 @@ void init() {
  */
 int main(void) {
 
-    // Initialization:
+    // Init --Please dont but anything above :)
     init();
-    adc_clk_init();
-    sram_init();
-    uart_init();
+    
     
 
     // One time code:

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #ifndef JOYSTICK_H
 #define JOYSTICK_H
 #include <stdio.h>
@@ -16,3 +17,6 @@ const char *joystick_directional_struct(struct Directional_power *P, enum select
 //enum joystick_get_direction(struct *position);
 
 #endif
+=======
+// Temp. stashed, will be recommited in the future.
+>>>>>>> 380b85f0d2ef62a2a75fc1e1cab35bb2d650ac59

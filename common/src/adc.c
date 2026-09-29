@@ -1,26 +1,16 @@
 #include <stdio.h>
 #include <avr/io.h>
 #include "../include/adc.h"
+#include <util/delay.h>
 
 
-typedef struct {
-    uint8_t x;
-    uint8_t y;
-}joystick_xy;
 
-typedef struct {
-    uint8_t x;
-    uint8_t y;
-}touch_xy;
-/**
- * Can be both translated, and direct analog values. 
- * 
- * TODO: Move to own file?
- */
-typedef struct {
-    joystick_xy joystick;
-    touch_xy touch;
-} pos_2D;
+
+// Macro definition "the byte stored at, treated as volatile uint8_t"
+#define ADC_JOYSTICK_X (*(volatile uint8_t *)0x1000) // AIN0 
+#define ADC_JOYSTICK_Y (*(volatile uint8_t *)0x1001) // AIN1
+#define ADC_TOUCH_X    (*(volatile uint8_t *)0x1002) // AIN2
+#define ADC_TOUCH_Y    (*(volatile uint8_t *)0x1003) // AIN3
 
 
 // Initialize the clock signal to the adc.
@@ -47,19 +37,13 @@ void adc_clk_init(void) {
 };
 
 
-// Global variables
-volatile uint8_t* adc_joystick_x_pos = (volatile char*) 0x1000; // ADC AIN0
-volatile uint8_t* adc_joystick_y_pos = (volatile char*) 0x1001; // ADC AIN1
-volatile uint8_t* adc_touch_x_pos = (volatile char*) 0x1002; // ADC AIN2
-volatile uint8_t* adc_touch_y_pos = (volatile char*) 0x1003; // ADC AIN3
-
 
 
 /**
  * Overwrites 0x1000 addr of adc, to initiate new read.
  */
 void adc_reset_read(void){
-    adc_joystick_x_pos = 0x00; //INITIATE NEW READ.
+    ADC_JOYSTICK_X = 0x00; //INITIATE NEW READ.
 }
 
 
@@ -74,10 +58,10 @@ pos_2D adc_read(void) {
     adc_reset_read(); //Read new values.
     _delay_us(10); //µs is needed for ADC to process.
 
-    input_state_t.joystick.x = adc_joystick_x_pos;
-    input_state_t.joystick.y = adc_joystick_y_pos;
-    input_state_t.touch.x = adc_touch_x_pos;
-    input_state_t.touch.y = adc_touch_y_pos;
+    input_state_t.joystick.x = ADC_JOYSTICK_X;
+    input_state_t.joystick.y = ADC_JOYSTICK_Y;
+    input_state_t.touch.x = ADC_TOUCH_X;
+    input_state_t.touch.y = ADC_TOUCH_Y;
 
 
     
@@ -105,9 +89,9 @@ void adc_test(void) {
     return;
 }
 
-//.....
-// ------ DRAFT: -------
-
+//.....                           
+// ------ DRAFT: ------- 
+#if 0 
 
 
 //Outer max
@@ -209,3 +193,4 @@ pos_2D adc_normalise_outer(pos_2D) {
 }
 
 // ---
+#endif
