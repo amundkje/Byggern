@@ -23,7 +23,38 @@
 
 
 
+// Test SPI communication
+// Need oscilloscope to verify
+void test_spi(void) {
 
+    spi_init();
+
+    while(1) {
+
+        spi_select(SPI_SLAVE_IO); // IO = PB4, OLED = PB3, CAN = PB1
+
+        spi_write(0xAA); // Send b'10101010' continually
+
+        spi_deselect();
+
+        _delay_ms(1);
+    }
+}
+// Test SPI with IO
+void test_spi_io(void) {
+
+    spi_init();
+
+    uint8_t rx_data[1];
+
+    while(1) {
+        spi_transceive_bytes(SPI_SLAVE_IO, NULL, rx_data, 1);
+        printf("IO spi received: %d\n\r", rx_data[0]);
+        _delay_ms(200);
+    }
+
+
+}
 
 
 // Simple test to set a pin high
@@ -90,6 +121,8 @@ int main(void) {
     printf("\n\r");
     printf("Hello There\n\r");
     printf("GENERAL KENOBI!!\n\n\r");
+
+    test_spi();
 
     adc_test();
 

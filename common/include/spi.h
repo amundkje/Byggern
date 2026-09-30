@@ -25,10 +25,10 @@ typedef enum {
 void spi_init();
 void spi_select(spi_slave_t slave);
 void spi_deselect(void);
-uint8_t spi_transcive(uint8_t data);
+uint8_t spi_transceive(uint8_t data);
 uint8_t spi_read(void);
 void spi_write(uint8_t data);
-void spi_transcive_bytes(spi_slave_t slave, 
+void spi_transceive_bytes(spi_slave_t slave, 
                         const uint8_t* tx_data, 
                         uint8_t* rx_data, 
                         uint8_t length);

@@ -70,7 +70,7 @@ void spi_deselect(void) {
 Send one byte over SPI and read received byte.
 This function is blocking until byte shift is complete.
 */
-uint8_t spi_transcive(uint8_t data) {
+uint8_t spi_transceive(uint8_t data) {
 
     // Write data to SPI data register
     // SPDR = SPI Data Registry
@@ -92,7 +92,7 @@ Read data from slave by sending a dummy byte
 uint8_t spi_read(void) {
 
     // Send dummy byte
-    return spi_transcive(0xFF);
+    return spi_transceive(0xFF);
 }
 
 
@@ -102,18 +102,19 @@ Send data to slave without reading recieved data
 void spi_write(uint8_t data) {
 
     // Send byte without reading recieved data
-    spi_transcive(data);
+    spi_transceive(data);
 }
 
 
 /**
 * This function sends and receives n bytes.
-* @param uint8_t if tx_data = NULL this sends dummy-bytes.
-* @param uint8_t if rx_data = NULL this does not store the recived bytes.
+* @param uint8_t If tx_data = NULL this sends dummy-bytes.
+*                Needs to be same length as length param.
+* @param uint8_t If rx_data = NULL this does not store the recived bytes.
 * @param uint8_t length = n
 *
 */
-void spi_transcive_bytes(spi_slave_t slave, 
+void spi_transceive_bytes(spi_slave_t slave, 
                         const uint8_t* tx_data, 
                         uint8_t* rx_data, 
                         uint8_t length)
@@ -127,7 +128,7 @@ void spi_transcive_bytes(spi_slave_t slave,
 
         // Send data if it exist, else send dummy-bytes
         uint8_t byte_to_send = (tx_data != NULL) ? tx_data[i] : 0xFF;
-        uint8_t received_byte = spi_transcive(byte_to_send);
+        uint8_t received_byte = spi_transceive(byte_to_send);
 
         // Store data if rx_data buffer is given
         if (rx_data != 0) {
