@@ -22,6 +22,9 @@
 // Please do not break the code :)
 
 
+// Place Test functions here.
+
+
 
 
 // Initialize stdout
@@ -29,41 +32,59 @@ void init() {
     stdout = fdevopen(uart_putchar, uart_getchar);  
 
     // Initialise other modules:
-    sram_init(); // MUST BE BEFORE ANY MEMORY USERS!
-
-    adc_clk_init(); // MUST BE AFTER SRAM.
-
+    adc_clk_init();
+    sram_init();
     uart_init();
+    spi_init();
+}
+
+/**
+ * Main function for the Node1 application.
+ *
+ * Initializes the UART and transmits a test string.
+ *
+ * @return 0 on successful execution.
+ */
+int main(void) {
+
+    // Init --Please dont put anything above :)
+    init();
+
+    // One time code, to see system start.:
+    printf("\n\r");
+    printf("Hello There\n\r");
+    printf("GENERAL KENOBI!!\n\n\r");
+
+    // Run test functions here.
+    // Please delete test functions when no longer needed.
+    // Test functions to be used later can have a dedicated file in sandbox.
+    
+
+    /*
+    joystick_init(); // currently uses default values.
+    // adc_test();
+    test_joystick_normalisation();
+    */
+
+    // Loop:
+    while(1) {
+        // Hold code;
+    };
+
+    return 0;
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Simple test to set a pin high
-void test_micro_with_pin(void) {
-    // Set PC0 as output
-    DDRC |= (1 << PC0);
-    PORTC |= (1 << PC0);  
-
-}
+/*
+*** OLD TEST FUNCTIONS ***
+*** DELETE WHEN NO LONGER IN USE ***
+*/
 
 
 /*
 * Can be used to test the UART's receive and transmit functions.
 * @NOTE: This is a blocking method, so will run until manually stopped.
-*/
+
 void test_transmit_receive() {
 
     char buffer[BUFFER_SIZE];
@@ -85,21 +106,12 @@ void test_transmit_receive() {
         
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    // Simple test to set a pin high
+void test_micro_with_pin(void) {
+    // Set PC0 as output
+    DDRC |= (1 << PC0);
+    PORTC |= (1 << PC0);  
+}
 
 void test_joystick_normalisation() {
     // stick is already initialised.
@@ -134,41 +146,4 @@ void test_joystick_normalisation() {
         
     }
 }
-
-
-
-
-
-
-/**
- * Main function for the Node1 application.
- *
- * Initializes the UART and transmits a test string.
- *
- * @return 0 on successful execution.
- */
-int main(void) {
-
-    // Init --Please dont but anything above :)
-    init();
-    
-
-
-    // One time code, to see system start.:
-    printf("\n\r");
-    printf("Hello There\n\r");
-    printf("GENERAL KENOBI!!\n\n\r");
-    
-    joystick_init(); // currently uses default values.
-
-    // adc_test();
-    test_joystick_normalisation();
-
-    // Loop:
-    while(1) {
-        // Hold code;
-    };
-
-    return 0;
-}
-
+*/
