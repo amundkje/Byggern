@@ -23,38 +23,7 @@
 
 
 
-// Test SPI communication
-// Need oscilloscope to verify
-void test_spi(void) {
 
-    spi_init();
-
-    while(1) {
-
-        spi_select(SPI_SLAVE_IO); // IO = PB4, OLED = PB3, CAN = PB1
-
-        spi_write(0xAA); // Send b'10101010' continually
-
-        spi_deselect();
-
-        _delay_ms(1);
-    }
-}
-// Test SPI with IO
-void test_spi_io(void) {
-
-    spi_init();
-
-    uint8_t rx_data[1];
-
-    while(1) {
-        spi_transceive_bytes(SPI_SLAVE_IO, NULL, rx_data, 1);
-        printf("IO spi received: %d\n\r", rx_data[0]);
-        _delay_ms(200);
-    }
-
-
-}
 
 
 // Simple test to set a pin high
@@ -62,35 +31,8 @@ void test_micro_with_pin(void) {
     // Set PC0 as output
     DDRC |= (1 << PC0);
     PORTC |= (1 << PC0);  
-
 }
 
-
-/*
-* Can be used to test the UART's receive and transmit functions.
-* @NOTE: This is a blocking method, so will run until manually stopped.
-*/
-void test_transmit_receive() {
-
-    char buffer[BUFFER_SIZE];
-    unsigned char length_of_received = 0;
-
-    const char *demo = "Jeg ser deg!\n\r\0";
-        uart_transmit_string(demo);
-    
-
-    //char <--- A WILD CHAR APPEARD! --Yes I got it as an error....
-
-    while (1)
-    {   
-        // uart_transmit(uart_receive());
-
-        uart_receive_string(buffer, BUFFER_SIZE);
-        uart_transmit_string(buffer);
-
-        
-    }
-}
 
 // Initialize stdout
 void init() {
@@ -100,6 +42,7 @@ void init() {
     adc_clk_init();
     sram_init();
     uart_init();
+    spi_init();
 }
 
 
@@ -113,18 +56,14 @@ void init() {
 int main(void) {
 
     // Init --Please dont but anything above :)
-    init();
-    
-    
+    init();    
 
     // One time code:
     printf("\n\r");
     printf("Hello There\n\r");
     printf("GENERAL KENOBI!!\n\n\r");
 
-    test_spi();
 
-    adc_test();
 
     // Loop:
     while(1) {

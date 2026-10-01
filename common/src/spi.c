@@ -92,7 +92,7 @@ Read data from slave by sending a dummy byte
 uint8_t spi_read(void) {
 
     // Send dummy byte
-    return spi_transceive(0xFF);
+    return spi_transceive(0x66);
 }
 
 
@@ -108,10 +108,10 @@ void spi_write(uint8_t data) {
 
 /**
 * This function sends and receives n bytes.
-* @param uint8_t If tx_data = NULL this sends dummy-bytes.
+* @param tx_data List of uint8_t values to be sendt. If tx_data = NULL this sends dummy-bytes.
 *                Needs to be same length as length param.
-* @param uint8_t If rx_data = NULL this does not store the recived bytes.
-* @param uint8_t length = n
+* @param rx_data List of uint8_t values to be stored. If rx_data = NULL this does not store the recived bytes.
+* @param length = n
 *
 */
 void spi_transceive_bytes(spi_slave_t slave, 
@@ -127,7 +127,7 @@ void spi_transceive_bytes(spi_slave_t slave,
     for (uint8_t i = 0; i < length; i++) {
 
         // Send data if it exist, else send dummy-bytes
-        uint8_t byte_to_send = (tx_data != NULL) ? tx_data[i] : 0xFF;
+        uint8_t byte_to_send = (tx_data != NULL) ? tx_data[i] : 0x66;
         uint8_t received_byte = spi_transceive(byte_to_send);
 
         // Store data if rx_data buffer is given
