@@ -64,7 +64,7 @@ uint8_t mcp2515_init(uint8_t mode) {
     mcp2515_bit_modify(MCP_CANCTRL, MODE_MASK, mode);
 
     // Verify mode
-    uint8_t status = mcp2515_read(MCP_CANSTAT);
+    status = mcp2515_read(MCP_CANSTAT);
     if ((status & MODE_MASK) != mode) {
         return 1; // IC not entered correct Mode
     }
@@ -116,19 +116,46 @@ void mcp2515_write(uint8_t address, uint8_t data) {
 
 }
 
+
+/**
+ * 
+ */
 void mcp2515_read_bytes(uint8_t start_address,
                         uint8_t* buffer,
                         uint8_t length)
 {
+    spi_select(SPI_SLAVE_CAN);
+    spi_write(MCP_READ);
+    spi_write(start_address);
 
+    // mcp2515 automatically increment address pointer when CS is kept low 
+    // and next databyte is requested.
+    for (uint8_t i = 0; i < length; i++) {
+        buffer[i] = spi_read();
+    }
+
+    spi_deselect();
 }
 
 
+/**
+ * 
+ */
 void mcp2515_write_bytes(uint8_t start_address,
                         const uint8_t* data,
                         uint8_t length)
 {
+    spi_select(SPI_SLAVE_CAN);
+    spi_write(MCP_WRITE);
+    spi_write(start_address);
 
+    // mcp2515 automatically increment address pointer when CS is kept low 
+    // and next databyte is sent.
+    for (uint8_t i = 0; i < length; i++) {
+        spi_write(data[i]);
+    }
+
+    spi_deselect();
 }
 
 
@@ -157,6 +184,7 @@ void mcp2515_request_to_send(uint8_t rts_instruction) {
     spi_deselect();
 
 }
+
 
 /**
 * This function modifies 1 or more bit i a register without changing the rest
