@@ -1,5 +1,7 @@
 // can.c
 
+#include <avr/io.h>
+#include <avr/interrupt.h>
 #include "can.h"
 #include "mcp2515.h"
 #include "mcp2515_registers.h"
@@ -17,6 +19,29 @@ void can_init(uint8_t mode) {
     // Set bit 5-6 in RXB0CTRL HIGH
     mcp2515_bit_modify(MCP_RXB0CTRL, 0x60, 0x60);
 
+    // Activate RB0 interrupt signal on msg recieve to MCU
+    mcp2515_bit_modify(MCP_CANINTE, MCP_RX0IF, MCP_RX0IF);
+
+}
+
+/**
+ * Configure mcp2515 to send interrupt signal to mcu
+ * when a can msg is received
+ */
+void can_interrupt_init(void) {
+
+    // Set PD2 as input
+    DDRD &= ~(1 << PD2);
+
+    // Configure INT0 to trigger on falling edge
+    MCUCR |= (1 << ISC01);
+    MCUCR &= ~(1 << ISC00);
+
+    // Activate external interrupt INT0
+    GICR |= (1 << INT0);
+
+    // Activate global interrupts
+    sei();
 }
 
 

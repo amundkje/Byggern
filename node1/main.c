@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <avr/io.h> 
+#include <avr/interrupt.h>
 #include <util/delay.h> // Must be after define F_CPU 
 
 
@@ -20,7 +21,11 @@
 #include "mcp2515.h"
 
 // User Definitions
-#define BUFFER_SIZE 255 
+#define BUFFER_SIZE 255
+
+// Global Variables
+volatile uint8_t can_message_pending = 0;
+
 
 // Please do not break the code :)
 
@@ -29,6 +34,7 @@
 void test_can(void) {
     // CAN TEST
     can_init(MODE_LOOPBACK);
+    // can_interrupt_init();
 
     // Test can msg
     can_message_t tx_msg = {
@@ -42,6 +48,10 @@ void test_can(void) {
 
     // send msg
     can_send(&tx_msg);
+
+    /**
+     * TODO: Test interrupt on receive
+     */
 
     // Answer immeidiatly available in looback mode
     if (can_receive(&rx_msg)) {
@@ -68,8 +78,20 @@ void init() {
      * TODO: uncomment this when can is tested
      */
     // can_init(MODE_NORMAL);
+    // can_interrupt_init();
 
 }
+
+
+/**
+ * Interrupt Service Routine
+ * Called when INT0 interrupt happen when PD2 is pulled low
+ */
+ISR(INT0_vect) {
+    // Set flag indicating a CAN-packet is received
+    can_message_pending = 1;
+}
+
 
 /**
  * Main function for the Node1 application.
