@@ -15,6 +15,9 @@
 #include "adc.h"
 #include "spi.h"
 #include "global_structs.h"
+#include "can.h"
+#include "mcp2515_registers.h"
+#include "mcp2515.h"
 
 // User Definitions
 #define BUFFER_SIZE 255 
@@ -23,7 +26,32 @@
 
 
 // Place Test functions here.
+void test_can(void) {
+    // CAN TEST
+    can_init(MODE_LOOPBACK);
 
+    // Test can msg
+    can_message_t tx_msg = {
+        .id = 0x123,
+        .length = 3,
+        .data = {0x04, 0x05, 0x06}
+    };
+
+    // rx buffer
+    can_message_t rx_msg;
+
+    // send msg
+    can_send(&tx_msg);
+
+    // Answer immeidiatly available in looback mode
+    if (can_receive(&rx_msg)) {
+        printf("Recieved: ID = 0x%X, Data = %d %d %d\n\r", 
+                rx_msg.id, rx_msg.data[0], rx_msg.data[1], rx_msg.data[2]);
+    }
+    else {
+        printf("No Bueno Amigo\n\r");
+    }
+}
 
 
 
@@ -36,6 +64,11 @@ void init() {
     sram_init();
     uart_init();
     spi_init();
+    /**
+     * TODO: uncomment this when can is tested
+     */
+    // can_init(MODE_NORMAL);
+
 }
 
 /**
@@ -58,6 +91,9 @@ int main(void) {
     // Run test functions here.
     // Please delete test functions when no longer needed.
     // Test functions to be used later can have a dedicated file in sandbox.
+    
+    // Test CAN
+    test_can();
     
 
     /*
