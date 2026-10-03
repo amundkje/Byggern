@@ -82,12 +82,12 @@ having to read->modify->write.
     MCP2515 Interrupt Flag bits (CANINTF)
 ==================================================
 */
-#define MCP_RX0IF       0X01 // RX Buffer 0 full
-#define MCP_RX1IF       0X02 // RX Buffer 1 full
-#define MCP_TX0IF       0X04 // TX Buffer 0 empty
-#define MCP_TX1IF       0X08 // TX Buffer 1 empty
-#define MCP_TX2IF       0X10 // TX Buffer 2 empty
-#define MCP_MERRF       0X80 // Message Error Flag
+#define MCP_RX0IF       (1 << 0) // RX Buffer 0 full
+#define MCP_RX1IF       (1 << 1) // RX Buffer 1 full
+#define MCP_TX0IF       (1 << 2) // TX Buffer 0 empty
+#define MCP_TX1IF       (1 << 3) // TX Buffer 1 empty
+#define MCP_TX2IF       (1 << 4) // TX Buffer 2 empty
+#define MCP_MERRF       (1 << 7) // Message Error Flag
 
 
 /*
