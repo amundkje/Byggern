@@ -13,15 +13,19 @@
 void can_init(uint8_t mode) {
 
     // Configure the mcp2515 chip
-    mcp2515_init(mode);
+    uint8_t mcp_init_status = mcp2515_init(mode);
+    if (mcp_init_status != 0) {
+        printf("mcp2515 init failed with error code %d\n\r", mcp_init_status);
+        while(1) {}
+    }
 
     // Deactivate mask filtering on RXB0 to receive all messages.
     // Set bit 5-6 in RXB0CTRL HIGH
     mcp2515_bit_modify(MCP_RXB0CTRL, 0x60, 0x60);
 
-    // Activate RB0 interrupt signal on msg recieve to MCU
-    mcp2515_bit_modify(MCP_CANINTE, MCP_RX0IF, MCP_RX0IF);
 
+    // Activate RB0 interrupt signal on msg recieve to MCU
+    mcp2515_write(MCP_CANINTE, MCP_RX0IE); 
 }
 
 /**
@@ -36,6 +40,9 @@ void can_interrupt_init(void) {
     // Configure INT0 to trigger on falling edge
     MCUCR |= (1 << ISC01);
     MCUCR &= ~(1 << ISC00);
+
+    // Reset int flag
+    GIFR |= (1 << INT0);
 
     // Activate external interrupt INT0
     GICR |= (1 << INT0);

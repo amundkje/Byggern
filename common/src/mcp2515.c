@@ -1,6 +1,7 @@
 // mcp2515.c
 
 #include <avr/io.h>
+#include <util/delay.h>
 #include "mcp2515.h"
 #include "mcp2515_registers.h"
 #include "spi.h"
@@ -19,6 +20,7 @@ uint8_t mcp2515_init(uint8_t mode) {
     // Verify the mcp2515 is in CONFIG MODE
     uint8_t status = mcp2515_read(MCP_CANSTAT);
     if ((status & MODE_MASK) != MODE_CONFIG) {
+        printf("status: 0x%02X, expected 0x%02X\n\r", status, MODE_CONFIG);
         return 1; // IC not entered Config Mode correctly
     }
 
@@ -61,13 +63,18 @@ uint8_t mcp2515_init(uint8_t mode) {
 
 
     // Set mode
-    mcp2515_bit_modify(MCP_CANCTRL, MODE_MASK, mode);
+    //mcp2515_bit_modify(MCP_CANCTRL, MODE_MASK, mode); Alternative if bit mod works
+    mcp2515_write(MCP_CANCTRL, mode);
 
     // Verify mode
     status = mcp2515_read(MCP_CANSTAT);
     if ((status & MODE_MASK) != mode) {
-        return 1; // IC not entered correct Mode
+        printf("status: 0x%02X, expected 0x%02X\n\r", status, MODE_CONFIG);
+        return 2; // IC not entered correct Mode
     }
+
+    // Reset interrupt flag
+    mcp2515_write(MCP_CANINTF, 0x00);
     
     return 0; // Successful init
 
@@ -81,6 +88,7 @@ void mcp2515_reset(void) {
     spi_select(SPI_SLAVE_CAN);
     spi_write(MCP_RESET);
     spi_deselect();
+    _delay_ms(1);
 }
 
 
@@ -118,7 +126,9 @@ void mcp2515_write(uint8_t address, uint8_t data) {
 
 
 /**
- * 
+ * Read multiple bytes without deactivating CS
+ * mcp2515 automatically increment address for each byte requested
+ * @note use can_message-t struct to handle pointer input
  */
 void mcp2515_read_bytes(uint8_t start_address,
                         uint8_t* buffer,
@@ -139,7 +149,9 @@ void mcp2515_read_bytes(uint8_t start_address,
 
 
 /**
- * 
+ * Write multiple bytes without deactivating CS
+ * mcp2515 automatically increment address for each byte sent
+ * @note use can_message_t struct to handle pointer input
  */
 void mcp2515_write_bytes(uint8_t start_address,
                         const uint8_t* data,

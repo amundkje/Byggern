@@ -24,45 +24,13 @@
 #define BUFFER_SIZE 255
 
 // Global Variables
-volatile uint8_t can_message_pending = 0;
+volatile uint8_t can_message_pending_flag = 0;
 
 
 // Please do not break the code :)
 
 
 // Place Test functions here.
-void test_can(void) {
-    // CAN TEST
-    can_init(MODE_LOOPBACK);
-    // can_interrupt_init();
-
-    // Test can msg
-    can_message_t tx_msg = {
-        .id = 0x123,
-        .length = 3,
-        .data = {0x04, 0x05, 0x06}
-    };
-
-    // rx buffer
-    can_message_t rx_msg;
-
-    // send msg
-    can_send(&tx_msg);
-
-    /**
-     * TODO: Test interrupt on receive
-     */
-
-    // Answer immeidiatly available in looback mode
-    if (can_receive(&rx_msg)) {
-        printf("Recieved: ID = 0x%X, Data = %d %d %d\n\r", 
-                rx_msg.id, rx_msg.data[0], rx_msg.data[1], rx_msg.data[2]);
-    }
-    else {
-        printf("No Bueno Amigo\n\r");
-    }
-}
-
 
 
 // Initialize stdout
@@ -74,11 +42,8 @@ void init() {
     sram_init();
     uart_init();
     spi_init();
-    /**
-     * TODO: uncomment this when can is tested
-     */
-    // can_init(MODE_NORMAL);
-    // can_interrupt_init();
+    can_init(MODE_NORMAL);
+    can_interrupt_init();
 
 }
 
@@ -89,7 +54,7 @@ void init() {
  */
 ISR(INT0_vect) {
     // Set flag indicating a CAN-packet is received
-    can_message_pending = 1;
+    can_message_pending_flag = 1;
 }
 
 
@@ -114,15 +79,9 @@ int main(void) {
     // Please delete test functions when no longer needed.
     // Test functions to be used later can have a dedicated file in sandbox.
     
-    // Test CAN
-    test_can();
-    
 
-    /*
-    joystick_init(); // currently uses default values.
-    // adc_test();
-    test_joystick_normalisation();
-    */
+
+
 
     // Loop:
     while(1) {

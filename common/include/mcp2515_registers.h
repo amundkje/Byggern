@@ -73,7 +73,7 @@ having to read->modify->write.
 #define MODE_SLEEP      0X20 // Sleep mode
 #define MODE_LOOPBACK   0X40 // For testing. Internal loop to read own tx
 #define MODE_LISTENONLY 0X60 // Listen only, send no ACK
-#define MODE_CONFIG     0X70 // Configuration mode to change settings
+#define MODE_CONFIG     0X80 // Configuration mode to change settings
 #define MODE_MASK       0XE0 // Mask for the 3 top bits in CANCTRL/CANSTAT
 
 
@@ -82,12 +82,15 @@ having to read->modify->write.
     MCP2515 Interrupt Flag bits (CANINTF)
 ==================================================
 */
-#define MCP_RX0IF       (1 << 0) // RX Buffer 0 full
-#define MCP_RX1IF       (1 << 1) // RX Buffer 1 full
-#define MCP_TX0IF       (1 << 2) // TX Buffer 0 empty
-#define MCP_TX1IF       (1 << 3) // TX Buffer 1 empty
-#define MCP_TX2IF       (1 << 4) // TX Buffer 2 empty
-#define MCP_MERRF       (1 << 7) // Message Error Flag
+#define MCP_RX0IF       0x01 // RX0 Buffer 0 full
+#define MCP_RX0IE       0x01 // RX0 interrup on recieve Enabled
+#define MCP_RX1IF       0x02 // RX1 Buffer 1 full
+#define MCP_RX1IE       0x02 // RX1 interrup on recieve Enabled
+#define MCP_TX0IF       0x04 // TX0 Buffer 0 empty
+#define MCP_TX1IF       0x08 // TX1 Buffer 1 empty
+#define MCP_TX2IF       0x10 // TX2 Buffer 2 empty
+#define MCP_MERRF       0x80 // Message Error Flag
+#define MCP_MERRE       0X80 // Message Error Interrupt Enable
 
 
 /*
