@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 #include <avr/io.h>
-#include "../include/uart.h"
+#include "uart.h"
 
 #define BAUD 9600
 #define UBRR_VALUE ((F_CPU / 16UL / BAUD) - 1) //UL = Unsigned Long: Unsigned meaning n >= 0, and Long meaning 32bit
