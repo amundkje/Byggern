@@ -64,7 +64,7 @@ void spi_deselect(void) {
     // Set all ChipSelect signals HIGH (deactivated)
     PORTB |= (1 << CAN_CS) | (1 << OLED_CS) | (1 << IO_CS);
 }
-
+// hvis 1 sett 1 osv
 
 /*
 Send one byte over SPI and read received byte.

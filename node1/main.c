@@ -44,6 +44,7 @@ void init() {
     spi_init();
     can_init(MODE_NORMAL);
     can_interrupt_init();
+    oled_init();
 
 }
 
@@ -78,7 +79,10 @@ int main(void) {
     // Run test functions here.
     // Please delete test functions when no longer needed.
     // Test functions to be used later can have a dedicated file in sandbox.
-    
+    oled_print("Hello");       // Displays HELLO
+    oled_goto_line(2);
+    oled_goto_column(0);
+    oled_print("Page 2");
 
 
 
@@ -90,14 +94,6 @@ int main(void) {
 
     return 0;
 }
-spi_init();
-oled_init();
-
-oled_print("Hello");       // Displays HELLO
-oled_goto_line(2);
-oled_goto_column(0);
-oled_print("Page 2");
-
 /*
 *** OLD TEST FUNCTIONS ***
 *** DELETE WHEN NO LONGER IN USE ***
