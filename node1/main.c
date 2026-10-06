@@ -79,12 +79,17 @@ int main(void) {
     // Run test functions here.
     // Please delete test functions when no longer needed.
     // Test functions to be used later can have a dedicated file in sandbox.
-    oled_print("Hello");       // Displays HELLO
+    
+    oled_print("Sir Babanusha");
     oled_goto_line(2);
     oled_goto_column(0);
-    oled_print("Page 2");
-
-
+    oled_print("Amund");
+    oled_goto_line(3);
+    oled_goto_column(0);
+    oled_print("Eivind");
+    oled_goto_line(4);
+    oled_goto_column(0);
+    oled_print("Gutta krutt......");
 
 
     // Loop:
