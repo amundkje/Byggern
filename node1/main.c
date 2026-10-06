@@ -19,7 +19,7 @@
 #include "can.h"
 #include "mcp2515_registers.h"
 #include "mcp2515.h"
-
+#include "oled.h"
 // User Definitions
 #define BUFFER_SIZE 255
 
@@ -90,7 +90,13 @@ int main(void) {
 
     return 0;
 }
+spi_init();
+oled_init();
 
+oled_print("Hello");       // Displays HELLO
+oled_goto_line(2);
+oled_goto_column(0);
+oled_print("Page 2");
 
 /*
 *** OLD TEST FUNCTIONS ***
