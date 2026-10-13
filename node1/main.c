@@ -20,6 +20,7 @@
 #include "mcp2515_registers.h"
 #include "mcp2515.h"
 #include "oled.h"
+#include "menu.h"
 // User Definitions
 #define BUFFER_SIZE 255
 
@@ -35,16 +36,26 @@ volatile uint8_t can_message_pending_flag = 0;
 
 // Initialize stdout
 void init() {
+    uint8_t reset_flags = MCUCSR;
+    uint8_t watchdog_control = WDTCR;
+    // Clear latched reset causes while preserving other MCUCSR settings.
+    MCUCSR &= ~((1 << JTRF) | (1 << WDRF) | (1 << BORF) |
+                (1 << EXTRF) | (1 << PORF));
     stdout = fdevopen(uart_putchar, uart_getchar);  
 
     // Initialise other modules:
     adc_clk_init();
     sram_init();
     uart_init();
+    printf("Reset: WDT=%d BOD=%d EXT=%d POR=%d JTAG=%d; WDTCR=0x%02X\r\n",
+           !!(reset_flags & (1 << WDRF)), !!(reset_flags & (1 << BORF)),
+           !!(reset_flags & (1 << EXTRF)), !!(reset_flags & (1 << PORF)),
+           !!(reset_flags & (1 << JTRF)), watchdog_control);
     spi_init();
     can_init(MODE_NORMAL);
     can_interrupt_init();
     oled_init();
+    joystick_init();
 
 }
 
@@ -58,11 +69,10 @@ ISR(INT0_vect) {
     can_message_pending_flag = 1;
 }
 
-
 /**
  * Main function for the Node1 application.
  *
- * Initializes the UART and transmits a test string.
+ * Initializes the hardware and navigates the OLED menu with the joystick.
  *
  * @return 0 on successful execution.
  */
@@ -75,27 +85,19 @@ int main(void) {
     printf("\n\r");
     printf("Hello There\n\r");
     printf("GENERAL KENOBI!!\n\n\r");
-
     // Run test functions here.
     // Please delete test functions when no longer needed.
     // Test functions to be used later can have a dedicated file in sandbox.
+    menu_draw();
     
-    oled_print("Sir Babanusha");
-    oled_goto_line(2);
-    oled_goto_column(0);
-    oled_print("Amund");
-    oled_goto_line(3);
-    oled_goto_column(0);
-    oled_print("Eivind");
-    oled_goto_line(4);
-    oled_goto_column(0);
-    oled_print("Gutta krutt......");
-
-
     // Loop:
     while(1) {
-        // Hold code;
-    };
+        pos_2D_unsigned input = adc_read();
+        xy_signed position = joystick_normalise_input(input.joystick);
+        directional_pos direction = joystick_get_directional(position.x, position.y);
+        menu_update(direction);
+        _delay_ms(20);
+    }
 
     return 0;
 }

@@ -71,6 +71,7 @@ void oled_reset(void) {
         oled_goto_column(0);
         PORTB |= (1 << DC);
         spi_select(SPI_SLAVE_OLED);
+        
         for (uint8_t col = 0; col < OLED_WIDTH; col++) spi_write(0);
         spi_deselect();
     }

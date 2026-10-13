@@ -30,9 +30,6 @@ void joystick_init() {
     __default_normalisation();
 }
 
-
-
-
 /**
  * A predetermined normalisation setup, for quick startup.
  */
@@ -107,13 +104,11 @@ directional_pos joystick_get_directional(int8_t x, int8_t y) {
     directional_pos new_pos = {0}; //Init to all zero values.
     uint8_t neutral_x = 0; //0 or 1 only.
     uint8_t neutral_y = 0; // .--.
-    
     //Check if neutral on either axis:
     if(abs(x) < DEADZONE) {
         neutral_x = 1;
         // printf("DEADZONE X \n\r");
     }
-
     if(abs(y) < DEADZONE) {
         neutral_y = 1;
         // printf("DEADZONE Y \n\r");
@@ -123,7 +118,6 @@ directional_pos joystick_get_directional(int8_t x, int8_t y) {
         new_pos.neutral = 1;   // up/down/left/right = 0, neutral = 1.
         return new_pos;
     }
-    
     if(!neutral_x){
         if (x > 0) { //Positive, RIGHT.
             new_pos.right = x;
