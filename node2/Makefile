@@ -3,10 +3,13 @@ BOOTUP = sam/sam3x/source/exceptions.c sam/sam3x/source/startup_sam3x.c sam/sam3
 MCUTYPE = __SAM3X8E__
 
 # ! Changed !
-SOURCE_FILES = $(BOOTUP) $(wildcard *.c)
+SOURCE_FILES = $(BOOTUP) $(wildcard *.c) $(wildcard common/src/*.c)
+
+INCLUDES = -I. -Icommon/include -Inode2
+
 
 # Feel free to ignore anything below this line
-# LUL NO :D
+# ^ LUL NO :D --- Heeeell Nah!
 VPATH:= $(dir $(SOURCE_FILES))
 BUILD_DIR := build
 OBJS := $(patsubst %.c, $(BUILD_DIR)/%$(ARCH)$(DEBUG).o, $(notdir $(SOURCE_FILES)))
@@ -20,8 +23,10 @@ ELF=$(BUILD_DIR)/main.elf
 
 LDFLAGS:= -T$(LDSCRIPT) -mthumb -mcpu=cortex-m3 -Wl,--gc-sections
 CFLAGS:= -mcpu=cortex-m3 -mthumb -g -std=c11 -MMD
-# La til ../common/include på linjen under
-CFLAGS+= -I sam -I sam/sam3x/include -I sam/sam3x/source -I sam/cmsis -I . -I ../common/include
+
+
+
+CFLAGS+= -I sam -I sam/sam3x/include -I sam/sam3x/source -I sam/cmsis -I . -I common/include
 CFLAGS+= -D $(MCUTYPE)
 
 .DEFAULT_GOAL := $(ELF)
