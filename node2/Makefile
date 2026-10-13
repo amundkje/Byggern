@@ -3,9 +3,9 @@ BOOTUP = sam/sam3x/source/exceptions.c sam/sam3x/source/startup_sam3x.c sam/sam3
 MCUTYPE = __SAM3X8E__
 
 # ! Changed !
-SOURCE_FILES = $(BOOTUP) $(wildcard *.c) $(wildcard common/src/*.c)
+SOURCE_FILES = $(BOOTUP) main.c $(wildcard common/src/*.c)
 
-INCLUDES = -I. -Icommon/include -Inode2
+INCLUDES = -I. -I/common/include -Inode2
 
 
 # Feel free to ignore anything below this line
@@ -22,15 +22,15 @@ AS:=arm-none-eabi-as
 ELF=$(BUILD_DIR)/main.elf
 
 LDFLAGS:= -T$(LDSCRIPT) -mthumb -mcpu=cortex-m3 -Wl,--gc-sections
-CFLAGS:= -mcpu=cortex-m3 -mthumb -g -std=c11 -MMD
+CFLAGS:= -mcpu=cortex-m3 -mthumb -g -std=c11 -MMD -DF_CPU=4915200UL
 
 
 
-CFLAGS+= -I sam -I sam/sam3x/include -I sam/sam3x/source -I sam/cmsis -I . -I common/include
+CFLAGS+= -I sam -I sam/sam3x/include -I sam/sam3x/source -I sam/cmsis -I . -I ../node2/common/include
 CFLAGS+= -D $(MCUTYPE)
 
 .DEFAULT_GOAL := $(ELF)
-# compile and generate dependancy info
+# compile and generate dependancy info-DF_CPU=4915200UL
 $(BUILD_DIR):
 	mkdir $(BUILD_DIR)
 

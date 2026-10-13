@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdarg.h>
-#include "sam.h"
+#include <sam.h>
+
 #include "uart.h" // Not the same uart.c as node1, this was given on canvas
 #include "can.h"  // Not the same can.c as node1, this was given on canvas
 
-#define F_CPU       84000000
+
+
+
 #define UART_BAUD   9600
 
 

@@ -3,7 +3,6 @@
 #include <avr/io.h>       // Registerdefinisjoner for ATmega162
 #include <util/delay.h>   // Delay-funksjoner
 
-#define F_CPU 4915200UL // 4915200 Hz ekstern krystall
 
 
 int main(void) {
