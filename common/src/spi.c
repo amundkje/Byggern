@@ -8,6 +8,11 @@ Initialize the SPI communication.
 */
 void spi_init() {
 
+    // Preload active-low chip selects before enabling their output drivers.
+    PORTB |= (1 << CAN_CS) | (1 << OLED_CS) | (1 << IO_CS);
+    // SPI mode 0 uses an idle-low clock.
+    PORTB &= ~((1 << MOSI) | (1 << SCK));
+
     // Configure output pins
     DDRB |= (1 << CAN_CS) | (1 << OLED_CS) |
             (1 << IO_CS) | (1 << MOSI) | (1 << SCK);
@@ -15,9 +20,8 @@ void spi_init() {
     // Configure input pins
     DDRB &= ~(1 << MISO);
 
-    // Initialize ChipSelect outputs as HIGH
-    // They are active low
-    PORTB |= (1 << CAN_CS) | (1 << OLED_CS) | (1 << IO_CS);
+    // Disable double speed so SPR0 selects f_osc / 16 consistently.
+    SPSR &= ~(1 << SPI2X);
 
     // Configure SPI Control Register (SPCR)
     // This activate the MCU's SPI module
@@ -64,7 +68,7 @@ void spi_deselect(void) {
     // Set all ChipSelect signals HIGH (deactivated)
     PORTB |= (1 << CAN_CS) | (1 << OLED_CS) | (1 << IO_CS);
 }
-
+// hvis 1 sett 1 osv
 
 /*
 Send one byte over SPI and read received byte.
