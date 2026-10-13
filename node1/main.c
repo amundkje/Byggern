@@ -42,8 +42,7 @@ void init() {
     sram_init();
     uart_init();
     spi_init();
-    can_init(MODE_NORMAL);
-    can_interrupt_init();
+    can_init(MODE_NORMAL, 0); // Interrupt: 1=enable, 0=disable
 
 }
 

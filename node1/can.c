@@ -10,7 +10,7 @@
 /**
  * This function initializes the mcp2515 chip
  */
-void can_init(uint8_t mode) {
+void can_init(uint8_t mode, uint8_t rxInterrupt) {
 
     // Configure the mcp2515 chip
     uint8_t mcp_init_status = mcp2515_init(mode);
@@ -25,7 +25,11 @@ void can_init(uint8_t mode) {
 
 
     // Activate RB0 interrupt signal on msg recieve to MCU
-    mcp2515_write(MCP_CANINTE, MCP_RX0IE); 
+    if (rxInterrupt) {
+        mcp2515_write(MCP_CANINTE, MCP_RX0IE);
+        can_interrupt_init();
+    }
+     
 }
 
 /**
