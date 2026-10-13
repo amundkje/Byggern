@@ -1,35 +1,68 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include "sam.h"
+#include "uart.h" // Not the same uart.c as node1, this was given on canvas
+#include "can.h"  // Not the same can.c as node1, this was given on canvas
+
+#define F_CPU       84000000
+#define UART_BAUD   9600
 
 
-/*
- * Remember to update the Makefile with the (relative) path to the uart.c file.
- * This starter code will not compile until the UART file has been included in the Makefile. 
- * If you get somewhat cryptic errors referencing functions such as _sbrk, 
- * _close_r, _write_r, _fstat etc, you have most likely not done that correctly.
-
- * If you get errors such as "arm-none-eabi-gcc: no such file", you may need to reinstall the arm gcc packages using
- * apt or your favorite package manager.
- */
-#include "uart.h"
-
-int main()
-{
+void init(void) {
     SystemInit();
 
     WDT->WDT_MR = WDT_MR_WDDIS; //Disable Watchdog Timer
 
-    //Uncomment after including uart above
-    uart_init(84000000, 9600); // (cpu_freq, baud)
+    uart_init(F_CPU, UART_BAUD); // (cpu_freq, baud)
+
+    /**
+     * CAN INIT
+     * 
+     * Set bit timing to match setup for node1 mcp2515
+     * Baudrate 250 KHz
+     * Amount of TQ = 16
+     * TQ = 250 ns
+     * 
+     * // Prescaler clock:
+     * BRP_sam = baud * TQ - 1 = 20
+     * 
+     * TQ1 = Sync (As described by the standard)
+     * TQ2-3 = PropSeg (To acount for delay on cable)
+     * TQ4-10 = PS1
+     * Sample is taken here at 62.5% of the frame
+     * TQ11-16 = PS2
+    */
+    CanInit can_settings = {
+        .phase1 = 6, 
+        .phase2 = 5,
+        .propag = 1,
+        .sjw = 0,
+        .brp = 20,
+        .smp = 0
+    };
+
+    can_init(can_settings, 0); // Interrupt: 1=enable, 0=disable
+
+}
+
+int main()
+{
+    // Please dont place code before init
+    init();
+
+    // Testprint
     printf("\n\r");
     printf("GENERAL KENOBI\n\r");
     printf("*COUGH*\n\r");
 
+    // Testfunctions here:
+
+
+
+
     while (1)
     {
-        //printf("Still working \n\r");
-        //for (int i = 0; i < 1000000; i++) {}
+
 
     }
     

@@ -6,6 +6,7 @@ MCUTYPE = __SAM3X8E__
 SOURCE_FILES = $(BOOTUP) $(wildcard *.c)
 
 # Feel free to ignore anything below this line
+# LUL NO :D
 VPATH:= $(dir $(SOURCE_FILES))
 BUILD_DIR := build
 OBJS := $(patsubst %.c, $(BUILD_DIR)/%$(ARCH)$(DEBUG).o, $(notdir $(SOURCE_FILES)))
@@ -52,6 +53,7 @@ debug: $(ELF)
 	arm-eabi-gdb -tui -iex "target extended-remote localhost:3333" $(ELF)
 	killall -s 9 openocd	
 
+# Changed second line: pgr -> pgrep
 .PHONY: flash
 flash: $(ELF)
 	#./sam/write_bin.sh sam/openocd.cfg $(BUILD_DIR)/main.elf
