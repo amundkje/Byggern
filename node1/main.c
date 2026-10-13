@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <avr/io.h> 
 #include <avr/interrupt.h>
-#include <util/delay.h> // Must be after define F_CPU 
+#include <util/delay.h>
 
 
 // Custom Drivers
@@ -27,11 +27,12 @@
 volatile uint8_t can_message_pending_flag = 0;
 
 
-// Please do not break the code :)
+// Remember: Please do not break the code :-)
 
 
 // Place Test functions here.
 
+// --
 
 // Initialize stdout
 void init() {

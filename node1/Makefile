@@ -1,5 +1,7 @@
 # List all source files to be compiled; separate with space
-SOURCE_FILES := $(wildcard *.c) $(wildcard common/src/*.c)
+SOURCE_FILES := main.c $(wildcard common/src/*.c)
+
+# $(wildcard *.c) 
 
 INCLUDES = -I. -I/usr/avr/include -Icommon/include -Inode1
 
