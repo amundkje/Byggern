@@ -73,7 +73,7 @@ int main(void) {
     // One time code, to see system start.:
     printf("\n\r");
     printf("Hello There\n\r");
-    printf("GENERAL KENOBI!!\n\n\r");
+    //printf("GENERAL KENOBI!!\n\n\r");
 
     // Run test functions here.
     // Please delete test functions when no longer needed.
