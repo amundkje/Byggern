@@ -4,6 +4,7 @@
 #include "uart.h" // Not the same uart.c as node1, this was given on canvas
 #include "can.h"  // Not the same can.c as node1, this was given on canvas
 
+
 #define F_CPU       84000000
 #define UART_BAUD   9600
 
@@ -56,6 +57,24 @@ int main()
     printf("*COUGH*\n\r");
 
     // Testfunctions here:
+
+    CanMsg test_msg = {
+        .id = 2,
+        .length = 4,
+        .byte = "Pong"
+    };
+
+    CanMsg rx;
+
+    while (1) {
+        if (can_rx(&rx)) {
+            printf("Received %c%c%c%c\n\r", rx.byte[0], rx.byte[1], rx.byte[2], rx.byte[3]);
+
+            can_tx(test_msg);
+            printf("Sendt Pong in return\n\r");
+        }
+    }
+
 
 
 

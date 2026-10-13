@@ -78,6 +78,20 @@ int main(void) {
     // Please delete test functions when no longer needed.
     // Test functions to be used later can have a dedicated file in sandbox.
     
+    can_message_t test_msg = {
+        .id = 1,
+        .length = 4,
+        .data = {'P','i','n','g'}
+    };
+
+    can_send(&test_msg);
+    printf("Sendt Ping\n\r");
+
+    while (1) {
+        if (can_receive(&test_msg)) {
+            printf("Received answer %c%c%c%c\n\r", test_msg.data[0], test_msg.data[1], test_msg.data[2], test_msg.data[3]);
+        }
+    }
 
 
 
