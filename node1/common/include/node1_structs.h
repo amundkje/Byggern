@@ -13,6 +13,14 @@ typedef struct {
     uint8_t bytes[8];    // Payload (up to 8 bytes)
 } canMsg;
 
+// Enumerated joystick direction
+enum joystick_direction {
+    NEUTRAL = 0,
+    UP = 1,
+    DOWN = 2,
+    LEFT = 3,
+    RIGHT = 4
+} ;
 
 // Use to hold both negative and positive values, to +- 100.
 typedef struct {
