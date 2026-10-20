@@ -60,6 +60,8 @@ ISR(INT0_vect) {
 }
 
 
+
+
 /**
  * Main function for the Node1 application.
  *
@@ -103,6 +105,13 @@ int main(void) {
         _delay_ms(1000);
     }
     
+
+
+    
+    printf(joystick_run_tests());
+    
+
+
 
     // Loop:
     while(1) {

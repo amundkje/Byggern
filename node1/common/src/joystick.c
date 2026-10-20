@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <avr/io.h>
 #include "../include/joystick.h"
-
+#include "node1_structs.h"
 #include "adc.h"
 #include <stdlib.h>
 
@@ -23,7 +23,7 @@ uint8_t OFFSET_VALUE_X;
 uint8_t MAX_ANALOG_VAL_X;
 uint8_t OFFSET_VALUE_Y;
 uint8_t MAX_ANALOG_VAL_Y;
-uint8_t DEADZONE;
+uint8_t DEADZONE; // From center (0) to/included DEADZONE (<=).
 
 void joystick_init() {
     //Currently init. with predetermined values, automate in future.
@@ -60,6 +60,7 @@ void joystick_update_normalisation(
 
     DEADZONE = deadzone; // percentage.
     
+
 
     //Just for debug:
     printf("OFF_X: %d | OFF_Y: %d | MAX_X: %d | MAX_Y: %d | DZ: %d\r\n", 
@@ -143,54 +144,41 @@ directional_pos joystick_get_directional(xy_signed norm_pos) {
 }
 
 
-
-
-/*
- * DRAFT!!
- *
+/**
+ * Checks if x, and y is within the deadzone parameter.
  * 
  * 
- * Changes the two-axis value, into four seperate directions, plus neutral. 
- * Checks if the two-axises is inside deadzone, if so neutral = 1, and all other values 
- * are zero.
- * 
- * @return a directional struct, see "directional_pos".
- * @important: Values for left and down will be additively inverted (-1*), to positive.
+ * @important: does NOT calculate absolute value of input, and within deadzone also includes deadzone value.
+ * @return int 1 or 0 as true/false.
  */
-directional_pos joystick_get_directional_basic(xy_signed norm_pos) {
+uint8_t within_deadzone(uint8_t x, uint8_t y) {
+    return (x <= DEADZONE && y <= DEADZONE);
+}
+
+
+uint8_t is_negative(int8_t number) {
+    return (number < 0);
+}
+
+/**
+ *  Turns a signed x,y coordinate pair into a single direction.
+ * @return a enum connected to the direction the x,y coordinate pair leans most towards.
+ */
+enum joystick_direction joystick_get_directional_basic(xy_signed norm_pos) {
+    enum joystick_direction basic_direction = NEUTRAL;
     int8_t x =  norm_pos.x;
     int8_t y =  norm_pos.y;
+    uint8_t abs_x = abs(x);
+    uint8_t abs_y = abs(y);
     
-    directional_pos new_pos = {0}; //Init to all zero values.
-    uint8_t neutral_x = 0; //0 or 1 only.
-    uint8_t neutral_y = 0; // .--.
-    //Check if neutral on either axis:
-    if(abs(x) < DEADZONE) {
-        neutral_x = 1;
-        // printf("DEADZONE X \n\r");
-    }
-    if(abs(y) < DEADZONE) {
-        neutral_y = 1;
-        // printf("DEADZONE Y \n\r");
-    }
-    if (neutral_x & neutral_y) {
-        //Joystick is neutral on both axis.
-        new_pos.neutral = 1;   // up/down/left/right = 0, neutral = 1.
-        return new_pos;
-    }
-    if(!neutral_x){
-        if (x > 0) { //Positive, RIGHT.
-            new_pos.right = x;
-        } else { // Negative, LEFT.
-            new_pos.left = -x; //Minus to revert to positive.
+    if (!within_deadzone(abs_x,abs_y)) {
+        
+        if (abs_x >= abs_y) {   //x direction is main.
+            basic_direction = is_negative(x) ? LEFT:RIGHT;
         }
-    }
-    if(!neutral_y){
-        if (y > 0) { //Positive, UP.
-            new_pos.up = y;
-        } else { // Negative, DOWN.
-            new_pos.down = -y; //Minus to revert to positive.
+        else {                  // y direction is main.
+            basic_direction = is_negative(y) ? DOWN:UP;
         }
-    }
-    return new_pos;
+    }   
+    return basic_direction;
 }
