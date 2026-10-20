@@ -48,6 +48,12 @@ void init(void) {
 
 }
 
+
+void delay_by_counting(void) {
+    for (int i = 0; i < 2000000; i++);
+}
+
+
 int main()
 {
     // Please dont place code before init
@@ -60,20 +66,11 @@ int main()
 
     // Testfunctions here:
 
-    CanMsg test_msg = {
-        .id = 2,
-        .length = 4,
-        .byte = "Pong"
-    };
-
     CanMsg rx;
 
     while (1) {
         if (can_rx(&rx)) {
-            printf("Received %c%c%c%c\n\r", rx.byte[0], rx.byte[1], rx.byte[2], rx.byte[3]);
-
-            can_tx(test_msg);
-            printf("Sendt Pong in return\n\n\r");
+            can_printmsg(rx);
         }
     }
 
