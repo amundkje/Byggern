@@ -60,4 +60,6 @@ dkms.conf
 .idea/
 .vscode/
 code/
-project.code-workspace 
+project.code-workspace
+buildmain.bin
+build/
