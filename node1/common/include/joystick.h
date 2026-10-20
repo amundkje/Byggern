@@ -18,7 +18,7 @@ void joystick_update_normalisation(
 
 xy_signed joystick_normalise_input(xy_unsigned pos_xy);
 
-directional_pos joystick_get_directional(int8_t x, int8_t y);
+directional_pos joystick_get_directional(xy_signed norm_pos);
 
 
 

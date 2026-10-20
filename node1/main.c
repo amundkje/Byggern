@@ -7,7 +7,6 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 
-
 // Custom Drivers
 #include "joystick.h"
 #include "uart.h"
@@ -25,17 +24,15 @@
 // Global Variables
 volatile uint8_t can_message_pending_flag = 0;
 
-
 // Remember: Please do not break the code :-)
 
 
 // Place Test functions here.
-
 // --
 
 // Initialize stdout
 void init() {
-    stdout = fdevopen(uart_putchar, uart_getchar);  
+    stdout = fdevopen(uart_putchar, uart_getchar);  //Allows printf to use UART
 
     // Initialise other modules:
     adc_clk_init();
@@ -55,6 +52,21 @@ ISR(INT0_vect) {
     // Set flag indicating a CAN-packet is received
     can_message_pending_flag = 1;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /**

@@ -93,6 +93,10 @@ const char *Direction[]={
 
 
 /**
+ * NOT CURRENTLY IN USE, BUT CAN BE USED AS BASE FOR NODE2 RECEIVER CODE.
+ * 
+ * 
+ * 
  * Changes the two-axis value, into four seperate directions, plus neutral. 
  * Checks if the two-axises is inside deadzone, if so neutral = 1, and all other values 
  * are zero.
@@ -100,7 +104,10 @@ const char *Direction[]={
  * @return a directional struct, see "directional_pos".
  * @important: Values for left and down will be additively inverted (-1*), to positive.
  */
-directional_pos joystick_get_directional(int8_t x, int8_t y) {
+directional_pos joystick_get_directional(xy_signed norm_pos) {
+    int8_t x =  norm_pos.x;
+    int8_t y =  norm_pos.y;
+    
     directional_pos new_pos = {0}; //Init to all zero values.
     uint8_t neutral_x = 0; //0 or 1 only.
     uint8_t neutral_y = 0; // .--.
@@ -134,8 +141,56 @@ directional_pos joystick_get_directional(int8_t x, int8_t y) {
     }
     return new_pos;
 }
-// Min touchpadvalues? and what type is it?
+
+
+
+
 /*
-void joystick_touchpad(unsigned int x, unsigned int y){
+ * DRAFT!!
+ *
+ * 
+ * 
+ * Changes the two-axis value, into four seperate directions, plus neutral. 
+ * Checks if the two-axises is inside deadzone, if so neutral = 1, and all other values 
+ * are zero.
+ * 
+ * @return a directional struct, see "directional_pos".
+ * @important: Values for left and down will be additively inverted (-1*), to positive.
+ */
+directional_pos joystick_get_directional_basic(xy_signed norm_pos) {
+    int8_t x =  norm_pos.x;
+    int8_t y =  norm_pos.y;
+    
+    directional_pos new_pos = {0}; //Init to all zero values.
+    uint8_t neutral_x = 0; //0 or 1 only.
+    uint8_t neutral_y = 0; // .--.
+    //Check if neutral on either axis:
+    if(abs(x) < DEADZONE) {
+        neutral_x = 1;
+        // printf("DEADZONE X \n\r");
+    }
+    if(abs(y) < DEADZONE) {
+        neutral_y = 1;
+        // printf("DEADZONE Y \n\r");
+    }
+    if (neutral_x & neutral_y) {
+        //Joystick is neutral on both axis.
+        new_pos.neutral = 1;   // up/down/left/right = 0, neutral = 1.
+        return new_pos;
+    }
+    if(!neutral_x){
+        if (x > 0) { //Positive, RIGHT.
+            new_pos.right = x;
+        } else { // Negative, LEFT.
+            new_pos.left = -x; //Minus to revert to positive.
+        }
+    }
+    if(!neutral_y){
+        if (y > 0) { //Positive, UP.
+            new_pos.up = y;
+        } else { // Negative, DOWN.
+            new_pos.down = -y; //Minus to revert to positive.
+        }
+    }
+    return new_pos;
 }
-*/
