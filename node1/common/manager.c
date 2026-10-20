@@ -23,20 +23,27 @@
  *
  * @see xy_signed struct for return type.
  */
-xy_signed read_joystick(enable_debug_mode) {
+xy_signed read_joystick(uint8_t enable_debug_mode) {
     pos_2D_unsigned analog_pos = adc_read();
     return joystick_normalise_input(analog_pos.joystick);
 }
 
 
-void get_directional_basic() {
-    return joystick_get_directional(read_joystick(0));
-}
 
-void update_arm(xy_signed new_joystick_pos) {
-    xy_signed new_pos = new_joystick_pos;
+/**
+ * Read joystick postition and send to node2 via CAN bus
+ */
+void update_arm(void) {
+    xy_signed new_pos = read_joystick(0);
 
-    int8_t byte_pck[2] = {new_pos.x, new_pos.y};
-    printf(byte_pck);
+    printf("pos x = %d, pos y = %d", new_pos.x, new_pos.y);
+
+    canMsg msg = {
+        .id = 0xA,
+        .length = 2,
+        .bytes = {new_pos.x, new_pos.y}
+    };
+
+    cantx(msg);
 
 }

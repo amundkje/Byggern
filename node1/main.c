@@ -20,6 +20,8 @@
 
 
 #include <common/manager.h>
+#include <common/manager.c>
+
 
 // User Definitions
 #define BUFFER_SIZE 255
@@ -41,6 +43,7 @@ void init() {
     adc_clk_init();
     sram_init();
     uart_init();
+    joystick_init();
     spi_init();
     can_init(MODE_NORMAL, 0); // Interrupt: 1=enable, 0=disable
 
@@ -55,21 +58,6 @@ ISR(INT0_vect) {
     // Set flag indicating a CAN-packet is received
     can_message_pending_flag = 1;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /**
@@ -92,33 +80,29 @@ int main(void) {
     // Run test functions here.
     // Please delete test functions when no longer needed.
     // Test functions to be used later can have a dedicated file in sandbox.
-    
+
+    while(1) {
+    xy_signed new_pos = read_joystick(0);
+
+    printf("pos x = %d, pos y = %d\n\r", new_pos.x, new_pos.y);
+
+    canMsg msg = {
+        .id = 0xA,
+        .length = 2,
+        .bytes = {new_pos.x, new_pos.y}
+    };
+
+    cantx(msg);
+
+    _delay_ms(1000);
+    }
 
     while (1)
     {
-
+        update_arm();
+        _delay_ms(1000);
     }
     
-
-
-
-    canMsg test_msg = {
-        .id = 1,
-        .length = 4,
-        .bytes = {'P','i','n','g'}
-    };
-
-    can_send(&test_msg);
-    printf("Sendt Ping\n\r");
-
-    while (1) {
-        if (can_receive(&test_msg)) {
-            printf("Received answer %c%c%c%c\n\r", test_msg.bytes[0], test_msg.bytes[1], test_msg.bytes[2], test_msg.bytes[3]);
-        }
-    }
-
-
-
 
     // Loop:
     while(1) {

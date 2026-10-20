@@ -8,8 +8,8 @@
 // Function declaration
 void can_init(uint8_t mode, uint8_t rxInterrupt);
 void can_interrupt_init(void);
-void can_send(const can_message_t* msg);
-uint8_t can_receive(can_message_t* msg);
+void cantx(canMsg msg);
+uint8_t canrx(canMsg* msg);
 
 
 #endif

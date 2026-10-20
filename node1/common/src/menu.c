@@ -1,6 +1,6 @@
 #include "menu.h"
 #include "oled.h"
-#include "global_structs.h"
+#include "node1_structs.h"
 #define menu_cnt 3
 static uint8_t selected = 0;
 static int8_t previous_menu_direction = 0;

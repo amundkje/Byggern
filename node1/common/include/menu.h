@@ -1,7 +1,7 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include "global_structs.h"
+#include "node1_structs.h"
 
 void menu_select(directional_pos dir);
 void menu_draw(void);

@@ -60,7 +60,7 @@ void can_interrupt_init(void) {
  * Send can message using TXB0 in mcp2515
  * @param msg is a can_message_t struct containing frame data
  */
-void can_tx(const canMsg msg) {
+void cantx(canMsg msg) {
 
     // First, Load can-packet content to registers in mcp2515
 
@@ -88,7 +88,7 @@ void can_tx(const canMsg msg) {
  * @param msg is a can_message_t struct to recieve frame data
  * @return 1 for message received, else 0 for no new msg in rx-register
  */
-uint8_t can_rx(canMsg* msg) {
+uint8_t canrx(canMsg* msg) {
 
     // Check if msg-received flag in mcp2515 is set (RX0IF)
     uint8_t interrupt_flags = mcp2515_read(MCP_CANINTF);

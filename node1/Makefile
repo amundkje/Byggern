@@ -3,7 +3,7 @@ SOURCE_FILES := main.c $(wildcard common/src/*.c)
 
 # $(wildcard *.c) 
 
-INCLUDES = -I. -I/usr/avr/include -Icommon/include -Inode1
+INCLUDES = -I. -I/usr/avr/include -Icommon/include -Inode1 -Icommon
 
 
 

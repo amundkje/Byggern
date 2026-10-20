@@ -20,7 +20,7 @@ enum joystick_direction {
     DOWN = 2,
     LEFT = 3,
     RIGHT = 4
-} ;
+};
 
 // Use to hold both negative and positive values, to +- 100.
 typedef struct {
