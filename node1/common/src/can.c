@@ -60,21 +60,21 @@ void can_interrupt_init(void) {
  * Send can message using TXB0 in mcp2515
  * @param msg is a can_message_t struct containing frame data
  */
-void can_send(const canMsg* msg) {
+void can_tx(const canMsg msg) {
 
     // First, Load can-packet content to registers in mcp2515
 
     // Write the 11 bit ID to SIDH and SIDL registers
     // Write ID bit 10-3 to SIDH
-    mcp2515_write(MCP_TXB0SIDH, (msg->id >> 3) & 0xFF);
+    mcp2515_write(MCP_TXB0SIDH, (msg.id >> 3) & 0xFF);
     // Write ID bit 2-0 to bit 7-5 in SIDL
-    mcp2515_write(MCP_TXB0SIDL, (msg->id & 0x07) << 5);
+    mcp2515_write(MCP_TXB0SIDL, (msg.id & 0x07) << 5);
 
     // Write Data Length Code to bit 3-0 in DLC register
-    mcp2515_write(MCP_TXB0DLC, msg->length & 0x0F);
+    mcp2515_write(MCP_TXB0DLC, msg.length & 0x0F);
 
     // Write databytes to payload registers (TXB0D0 - TXB0D7)
-    mcp2515_write_bytes(MCP_TXB0D0, msg->bytes, msg->length);
+    mcp2515_write_bytes(MCP_TXB0D0, msg.bytes, msg.length);
 
     // With everything loaded in the mcp2515,
     // send can-packet with RTS
@@ -88,7 +88,7 @@ void can_send(const canMsg* msg) {
  * @param msg is a can_message_t struct to recieve frame data
  * @return 1 for message received, else 0 for no new msg in rx-register
  */
-uint8_t can_receive(canMsg* msg) {
+uint8_t can_rx(canMsg* msg) {
 
     // Check if msg-received flag in mcp2515 is set (RX0IF)
     uint8_t interrupt_flags = mcp2515_read(MCP_CANINTF);

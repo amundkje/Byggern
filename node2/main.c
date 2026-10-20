@@ -56,7 +56,7 @@ int main()
     // Testprint
     printf("\n\r");
     printf("GENERAL KENOBI\n\r");
-    printf("*COUGH*\n\r");
+    printf("*COUGH*\n\n\r");
 
     // Testfunctions here:
 
@@ -73,7 +73,7 @@ int main()
             printf("Received %c%c%c%c\n\r", rx.byte[0], rx.byte[1], rx.byte[2], rx.byte[3]);
 
             can_tx(test_msg);
-            printf("Sendt Pong in return\n\r");
+            printf("Sendt Pong in return\n\n\r");
         }
     }
 
