@@ -18,6 +18,9 @@
 #include "mcp2515_registers.h"
 #include "mcp2515.h"
 
+
+#include <common/manager.h>
+
 // User Definitions
 #define BUFFER_SIZE 255
 
@@ -90,6 +93,15 @@ int main(void) {
     // Please delete test functions when no longer needed.
     // Test functions to be used later can have a dedicated file in sandbox.
     
+
+    while (1)
+    {
+
+    }
+    
+
+
+
     canMsg test_msg = {
         .id = 1,
         .length = 4,
@@ -115,77 +127,3 @@ int main(void) {
 
     return 0;
 }
-
-
-/*
-*** OLD TEST FUNCTIONS ***
-*** DELETE WHEN NO LONGER IN USE ***
-*/
-
-
-/*
-* Can be used to test the UART's receive and transmit functions.
-* @NOTE: This is a blocking method, so will run until manually stopped.
-
-void test_transmit_receive() {
-
-    char buffer[BUFFER_SIZE];
-    unsigned char length_of_received = 0;
-
-    const char *demo = "Jeg ser deg!\n\r\0";
-        uart_transmit_string(demo);
-    
-
-    //char <--- A WILD CHAR APPEARD! --Yes I got it as an error....
-
-    while (1)
-    {   
-        // uart_transmit(uart_receive());
-
-        uart_receive_string(buffer, BUFFER_SIZE);
-        uart_transmit_string(buffer);
-
-        
-    }
-}
-    // Simple test to set a pin high
-void test_micro_with_pin(void) {
-    // Set PC0 as output
-    DDRC |= (1 << PC0);
-    PORTC |= (1 << PC0);  
-}
-
-void test_joystick_normalisation() {
-    // stick is already initialised.
-    
-    pos_2D_unsigned analog_pos;
-    xy_signed norm_pos;
-    directional_pos scaled_pos;
-    printf("Initiating analog test....");
-    while (1)
-    {   
-        analog_pos = adc_read();
-        // printf("\n\r");
-        // printf("READ ANALOG: \n\r");
-        // printf("X: %d \n\r",analog_pos.joystick.x);
-        // printf("Y: %d \n\r",analog_pos.joystick.y);
-        // printf("------------A END--------------\n\r");
-        _delay_ms(100);
-    
-
-        norm_pos = joystick_normalise_input(analog_pos.joystick);
-        // printf("NORMALISED: \n\r");
-        // printf("X: %d \n\r",norm_pos.x);
-        // printf("Y: %d \n\r",norm_pos.y);
-        // printf("------------NORM END---------------\n\r");
-        // _delay_ms(100);
-
-        scaled_pos = joystick_get_directional(norm_pos.x,norm_pos.y);
-
-         printf("up=%d down=%d left=%d right=%d neutral=%d \n\r",
-           scaled_pos.up, scaled_pos.down,
-            scaled_pos.left, scaled_pos.right, scaled_pos.neutral);
-        
-    }
-}
-*/
