@@ -2,7 +2,7 @@
 #define CAN_H
 
 #include <stdio.h>
-#include "global_structs.h"
+#include "node1_structs.h"
 
 
 // Function declaration

@@ -1,6 +1,5 @@
 
 
-
 // Lib. Includes
 #include <stdint.h>
 #include <stdio.h>
@@ -15,7 +14,7 @@
 #include "sram.h"
 #include "adc.h"
 #include "spi.h"
-#include "global_structs.h"
+#include "node1_structs.h"
 #include "can.h"
 #include "mcp2515_registers.h"
 #include "mcp2515.h"
@@ -79,10 +78,10 @@ int main(void) {
     // Please delete test functions when no longer needed.
     // Test functions to be used later can have a dedicated file in sandbox.
     
-    can_message_t test_msg = {
+    canMsg test_msg = {
         .id = 1,
         .length = 4,
-        .data = {'P','i','n','g'}
+        .bytes = {'P','i','n','g'}
     };
 
     can_send(&test_msg);
@@ -90,7 +89,7 @@ int main(void) {
 
     while (1) {
         if (can_receive(&test_msg)) {
-            printf("Received answer %c%c%c%c\n\r", test_msg.data[0], test_msg.data[1], test_msg.data[2], test_msg.data[3]);
+            printf("Received answer %c%c%c%c\n\r", test_msg.bytes[0], test_msg.bytes[1], test_msg.bytes[2], test_msg.bytes[3]);
         }
     }
 

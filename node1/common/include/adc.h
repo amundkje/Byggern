@@ -2,7 +2,7 @@
 #define ADC_H
 
 #include <stdint.h> //Used for *int8_t
-#include "global_structs.h"
+#include "node1_structs.h"
 
 
 void adc_clk_init(void);

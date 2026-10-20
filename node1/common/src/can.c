@@ -60,7 +60,7 @@ void can_interrupt_init(void) {
  * Send can message using TXB0 in mcp2515
  * @param msg is a can_message_t struct containing frame data
  */
-void can_send(const can_message_t* msg) {
+void can_send(const canMsg* msg) {
 
     // First, Load can-packet content to registers in mcp2515
 
@@ -74,7 +74,7 @@ void can_send(const can_message_t* msg) {
     mcp2515_write(MCP_TXB0DLC, msg->length & 0x0F);
 
     // Write databytes to payload registers (TXB0D0 - TXB0D7)
-    mcp2515_write_bytes(MCP_TXB0D0, msg->data, msg->length);
+    mcp2515_write_bytes(MCP_TXB0D0, msg->bytes, msg->length);
 
     // With everything loaded in the mcp2515,
     // send can-packet with RTS
@@ -88,7 +88,7 @@ void can_send(const can_message_t* msg) {
  * @param msg is a can_message_t struct to recieve frame data
  * @return 1 for message received, else 0 for no new msg in rx-register
  */
-uint8_t can_receive(can_message_t* msg) {
+uint8_t can_receive(canMsg* msg) {
 
     // Check if msg-received flag in mcp2515 is set (RX0IF)
     uint8_t interrupt_flags = mcp2515_read(MCP_CANINTF);
@@ -105,7 +105,7 @@ uint8_t can_receive(can_message_t* msg) {
         msg->length = mcp2515_read(MCP_RXB0DLC);
 
         // Extract data payload
-        mcp2515_read_bytes(MCP_RXB0D0, msg->data, msg->length);
+        mcp2515_read_bytes(MCP_RXB0D0, msg->bytes, msg->length);
 
         // Reset interrupt flag so new messages can be received
         mcp2515_bit_modify(MCP_CANINTF, MCP_RX0IF, 0x00);

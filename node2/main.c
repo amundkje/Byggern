@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <sam.h>
@@ -7,8 +8,6 @@
 
 
 #define F_CPU       84000000
-
-
 #define UART_BAUD   9600
 
 

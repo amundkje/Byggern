@@ -2,7 +2,7 @@
 #define JOYSTICK_H
 
 
-#include "global_structs.h"
+#include "node1_structs.h"
 
 
 

@@ -1,5 +1,5 @@
-#ifndef GLOBAL_STRUCTS_H
-#define GLOBAL_STRUCTS_H
+#ifndef NODE1_STRUCTS_H
+#define NODE1_STRUCTS_H
 
 
 #include <stdint.h> //Used for *int8_t
@@ -10,8 +10,8 @@
 typedef struct {
     uint16_t id;        // 11-bit CAN ID (0x000 to 0x7FF)
     uint8_t length;     // Number of bytes in payload (0-8)
-    uint8_t data[8];    // Payload (up to 8 bytes)
-} can_message_t;
+    uint8_t bytes[8];    // Payload (up to 8 bytes)
+} canMsg;
 
 
 // Use to hold both negative and positive values, to +- 100.
