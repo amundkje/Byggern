@@ -36,8 +36,10 @@ void joystick_init() {
 void __default_normalisation() {
     joystick_update_normalisation(
         36,175,36,175,
-        1,10
+        1,30
     );
+
+    printf("Joystick Initialised: \n\r ---Configured with default normalisation factors.. \n\r");
 }
 
 /**

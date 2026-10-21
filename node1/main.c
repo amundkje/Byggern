@@ -20,8 +20,6 @@
 
 
 #include <common/manager.h>
-#include <common/manager.c>
-
 
 // User Definitions
 #define BUFFER_SIZE 255
@@ -83,6 +81,32 @@ int main(void) {
     // Please delete test functions when no longer needed.
     // Test functions to be used later can have a dedicated file in sandbox.
 
+
+
+
+    
+
+
+    uint32_t counter = 0;
+    while (1) {
+
+       
+        counter +=1;
+        printf("TESTING DIRECTIONAL TRANSLATION. %d \n\r", counter);
+        
+
+       
+        xy_signed pos = read_joystick(0);
+        printf("X: %d -- Y: %d \n\r",pos.x,pos.y);
+
+
+        
+        printf("DIRECTION ENUM:   %d \n\r", get_directional_basic());
+    
+        _delay_ms(500);
+    }
+    
+    
     while(1) {
     xy_signed new_pos = read_joystick(0);
 
@@ -107,9 +131,7 @@ int main(void) {
     
 
 
-    
-    printf(joystick_run_tests());
-    
+   
 
 
 

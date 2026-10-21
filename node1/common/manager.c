@@ -29,12 +29,9 @@ xy_signed read_joystick(uint8_t enable_debug_mode) {
 }
 
 
-<<<<<<< HEAD
-=======
-void get_directional_basic() {
+enum joystick_direction get_directional_basic() {
     return joystick_get_directional_basic(read_joystick(0));
 }
->>>>>>> 1636e26 (joystick now support basic directional returns)
 
 /**
  * Read joystick postition and send to node2 via CAN bus

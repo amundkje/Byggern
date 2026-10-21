@@ -7,6 +7,8 @@
 
 xy_signed read_joystick(uint8_t enable_debug_mode);
 
+enum joystick_direction get_directional_basic();
+
 void update_arm(void);
 
 

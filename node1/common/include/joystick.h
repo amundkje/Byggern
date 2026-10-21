@@ -21,5 +21,5 @@ xy_signed joystick_normalise_input(xy_unsigned pos_xy);
 directional_pos joystick_get_directional(xy_signed norm_pos);
 
 
-
+enum joystick_direction joystick_get_directional_basic(xy_signed norm_pos);
 #endif

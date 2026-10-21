@@ -3,9 +3,6 @@
 #include "../include/adc.h"
 #include <util/delay.h>
 
-
-
-
 // Macro definition "the byte stored at, treated as volatile"
 #define ADC_JOYSTICK_X (*(volatile uint8_t *)0x1000) // AIN0 
 #define ADC_JOYSTICK_Y (*(volatile uint8_t *)0x1001) // AIN1
@@ -47,7 +44,9 @@ void adc_reset_read(void){
 
 /**
  * Reads current ADC values into a positional matrix
+ * Supports debug printing.
  * @return filled positional matrix.
+ * 
  */
 pos_2D_unsigned adc_read(void) {   
     pos_2D_unsigned input_state_t;
@@ -59,7 +58,6 @@ pos_2D_unsigned adc_read(void) {
     input_state_t.joystick.y = ADC_JOYSTICK_Y;
     input_state_t.touch.x = ADC_TOUCH_X;
     input_state_t.touch.y = ADC_TOUCH_Y;
-
     return input_state_t;
 };
 

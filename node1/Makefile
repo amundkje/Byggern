@@ -1,5 +1,5 @@
 # List all source files to be compiled; separate with space
-SOURCE_FILES := main.c $(wildcard common/src/*.c)
+SOURCE_FILES := main.c $(wildcard common/*.c) $(wildcard common/src/*.c)
 
 # $(wildcard *.c) 
 
