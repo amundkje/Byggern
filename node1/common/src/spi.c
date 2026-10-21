@@ -96,7 +96,9 @@ Read data from slave by sending a dummy byte
 uint8_t spi_read(void) {
 
     // Send dummy byte
-    return spi_transceive(0x66);
+    // Changed dummy byte to 0xFF, 
+    // a random value might coincide with an actual command.
+    return spi_transceive(0xFF);  
 }
 
 
