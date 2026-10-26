@@ -25,6 +25,11 @@
 // User Definitions
 #define BUFFER_SIZE 255
 
+// Can IDs
+#define CAN_ID_GAMESTATE    1
+#define CAN_ID_JOYSTICK     2
+#define CAN_ID_ERROR        3
+
 // Global Variables
 volatile uint8_t can_message_pending_flag = 0;
 enum gameState current_gamestate = MENU; 

@@ -17,6 +17,12 @@
 #include "mcp2515_registers.h"
 #include "mcp2515.h"
 
+// Can IDs
+#define CAN_ID_GAMESTATE    1
+#define CAN_ID_JOYSTICK     2
+#define CAN_ID_ERROR        3
+
+
 
 /**
  * Reads new ADC input and returns a normalised joystick input.
@@ -44,7 +50,7 @@ void update_arm(void) {
     xy_signed new_pos = read_joystick(0);
 
     canMsg msg = {
-        .id = 0xA,
+        .id = CAN_ID_JOYSTICK,
         .length = 2,
         .bytes = {new_pos.x, new_pos.y}
     };

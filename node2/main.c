@@ -10,6 +10,22 @@
 #define F_CPU       84000000
 #define UART_BAUD   9600
 
+// Can IDs
+#define CAN_ID_GAMESTATE    1
+#define CAN_ID_JOYSTICK     2
+#define CAN_ID_ERROR        3
+
+
+// Enumerated gamestate
+enum gameState {
+    NODE2_IDLE = 0,
+    NODE2_RUNNING,
+    NODE2_ERROR
+};
+
+enum gameState current_gamestate = NODE2_IDLE;
+
+
 
 void init(void) {
     SystemInit();
@@ -52,7 +68,61 @@ void init(void) {
 void delay_by_counting(void) {
     for (int i = 0; i < 2000000; i++);
 }
+void can_printmsg_int(CanMsg m){
+    printf("CanMsg(id:%d, length:%d, data:{", m.id, m.length);
+    if(m.length){
+        printf("%d", (int8_t)m.byte[0]);
+    }
+    for(uint8_t i = 1; i < m.length; i++){
+        printf(", %d", (int8_t)m.byte[i]);
+    }
+    printf("})\n\r");
+}
 
+/**
+ * Game running function
+ */
+void run_game(void) {
+
+    CanMsg rx;
+
+    if (can_rx(&rx)) {
+        // For debug
+        can_printmsg_int(rx);
+
+        // Check received can id 
+        switch (rx.id) {
+            case CAN_ID_GAMESTATE:
+                break;
+
+            case CAN_ID_JOYSTICK:
+                break;
+
+            case CAN_ID_ERROR:
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    // Action based on current gamestate
+    switch (current_gamestate) {
+        case NODE2_IDLE:
+            break;
+        
+        case NODE2_RUNNING:
+            break;
+        
+        case NODE2_ERROR:
+            break;
+
+        default:
+            break;
+    }
+
+
+}
 
 int main()
 {
@@ -66,22 +136,13 @@ int main()
 
     // Testfunctions here:
 
-    CanMsg rx;
-
-    while (1) {
-        if (can_rx(&rx)) {
-            can_printmsg(rx);
-        }
-    }
 
 
-
-
-
+    // Main loop
     while (1)
     {
-
-
+        run_game(); // Main game function
     }
-    
+
+    return 0;
 }
