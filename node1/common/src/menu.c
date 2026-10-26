@@ -2,7 +2,8 @@
 #include "oled.h"
 #include "node1_structs.h"
 #include "../manager.h"
-#define menu_cnt 3
+#include <util/delay.h>
+//#define menu_cnt 3
 
 //static uint8_t selected = 0;
 //static int8_t previous_menu_direction = 0;
@@ -22,6 +23,10 @@ void menu_draw(void)
     oled_print(current_selected == MENU_SETTINGS ? "> Settings" : "  Settings");
 
     oled_goto_line(2);
+    oled_goto_column(0);
+    oled_print(current_selected == MENU_CALIBRATE ? "> Calibrate joystick" : "  Calibrate joystick");    
+
+    oled_goto_line(3);
     oled_goto_column(0);
     oled_print(current_selected == MENU_CREDITS ? "> Credits" : "  Credits");
 }
@@ -51,7 +56,7 @@ enum gameState menu_update(void) {
 
             // Move down
             case DOWN:
-                if (current_selected < MENU_NUM_ITEMS) {
+                if (current_selected < MENU_NUM_ITEMS-1) {
                     current_selected++;
                     menu_draw();
                 }
@@ -73,8 +78,18 @@ enum gameState menu_update(void) {
                 else if (current_selected == MENU_SETTINGS) {
                     // To be implemented
                 }
+                else if (current_selected == MENU_CALIBRATE) {
+                    // To be implemented
+                }
                 else if (current_selected == MENU_CREDITS) {
                     // To be implemented
+                    oled_reset();
+                    oled_home();
+                    oled_print("Made by three monkeys");
+                    _delay_ms(5000);
+                    oled_reset();
+                    oled_home();
+                    menu_draw();
                 }
                 break;
 

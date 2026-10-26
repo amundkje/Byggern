@@ -6,6 +6,7 @@
 enum menuItems {
     MENU_START_GAME = 0,
     MENU_SETTINGS,
+    MENU_CALIBRATE,
     MENU_CREDITS,
     MENU_NUM_ITEMS // By having this last; this gives num of items in enum
 };

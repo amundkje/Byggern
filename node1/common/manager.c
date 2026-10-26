@@ -25,6 +25,10 @@
  */
 xy_signed read_joystick(uint8_t enable_debug_mode) {
     pos_2D_unsigned analog_pos = adc_read();
+    
+    // For debug
+    //printf("X = %d    Y = %d\n\r", analog_pos.joystick.x, analog_pos.joystick.y);
+
     return joystick_normalise_input(analog_pos.joystick);
 }
 

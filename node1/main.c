@@ -20,6 +20,7 @@
 #include "oled.h"
 #include "menu.h"
 #include <common/manager.h>
+#include "io_buttons.h"
 
 // User Definitions
 #define BUFFER_SIZE 255
@@ -75,7 +76,30 @@ ISR(INT0_vect) {
     can_message_pending_flag = 1;
 }
 
+/**
+ * Gamelogic
+ */
+void run_game(void) {
+    while (current_gamestate == MENU) 
+    {
+        current_gamestate = menu_update();
+        _delay_ms(20);
+    }
 
+
+    while (current_gamestate == RUNNING)
+    {
+        update_arm();
+        _delay_ms(10);
+
+        // Buttonpress to return to menu
+        Buttons io_buttons = io_button_read();
+        if (io_buttons.L7) {
+            current_gamestate = MENU;
+            menu_init();
+        }
+    }
+}
 
 
 /**
@@ -100,30 +124,11 @@ int main(void) {
     // Please delete test functions when no longer needed.
     // Test functions to be used later can have a dedicated file in sandbox.
 
-
-    while (current_gamestate == MENU) 
-    {
-        current_gamestate = menu_update();
-        _delay_ms(20);
-    }
-
-
-    while (current_gamestate == RUNNING)
-    {
-        update_arm();
-        _delay_ms(10);
-
-        // Buttonpress to return to menu
-        //TODO
-    }
-    
-
-
-
+    //while(1){ read_joystick(0); _delay_ms(500); }
 
     // Loop:
     while(1) {
-        // Hold code;
+        run_game();
     };
 
     return 0;

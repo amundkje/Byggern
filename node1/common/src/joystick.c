@@ -35,10 +35,12 @@ void joystick_init() {
  */
 void __default_normalisation() {
     joystick_update_normalisation(
-        36,175,36,175,
+        10,155,10,155,
         1,30
     );
 
+    // Old values
+    //36,175,36,175,1,30
     printf("Joystick Initialised: \n\r ---Configured with default normalisation factors.. \n\r");
 }
 
@@ -62,8 +64,6 @@ void joystick_update_normalisation(
 
     DEADZONE = deadzone; // percentage.
     
-
-
     //Just for debug:
     printf("OFF_X: %d | OFF_Y: %d | MAX_X: %d | MAX_Y: %d | DZ: %d\r\n", 
        OFFSET_VALUE_X, OFFSET_VALUE_Y, 

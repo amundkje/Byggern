@@ -3,18 +3,16 @@
 
 // includes
 #include <stdio.h>
+#include "node1_structs.h"
 
 // Defines
-#define IO_BTN_LEFT     (1 << 0)
-#define IO_BTN_RIGHT    (1 << 1)
-#define IO_BTN_UP       (1 << 2)
-#define IO_BTN_DOWN     (1 << 3)
-#define IO_BTN_JOYSTICK (1 << 4)
-#define IO_BTN_TOUCH    (1 << 5)
 
 
 // Function declarations
-uint8_t io_button_state(void);
-uint8_t io_button_pressed(void);
+Buttons io_button_read(void);
+void io_led_set(io_led_t led, uint8_t state);
+void io_led_pwm(io_led_t led, uint8_t brightness);
+
+//uint8_t io_button_pressed(void);
 
 #endif

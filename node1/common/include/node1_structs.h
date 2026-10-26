@@ -29,6 +29,53 @@ enum joystick_direction {
     RIGHT = 4
 };
 
+// Button states struct when read from io-board
+typedef struct __attribute__((packed)) {
+    union {
+        uint8_t right;
+        struct {
+            uint8_t R1:1;
+            uint8_t R2:1;
+            uint8_t R3:1;
+            uint8_t R4:1;
+            uint8_t R5:1;
+            uint8_t R6:1;
+        };
+    };
+    union {
+        uint8_t left;
+        struct {
+            uint8_t L1:1;
+            uint8_t L2:1;
+            uint8_t L3:1;
+            uint8_t L4:1;
+            uint8_t L5:1;
+            uint8_t L6:1;
+            uint8_t L7:1;
+        };
+    };
+    union {
+        uint8_t nav;
+        struct {
+            uint8_t NB:1;
+            uint8_t NR:1;
+            uint8_t ND:1;
+            uint8_t NL:1;
+            uint8_t NU:1;
+        };
+    };
+} Buttons;
+
+// IO-board led light definition
+typedef enum { 
+IO_LED1 = 0,
+IO_LED2 = 1, 
+IO_LED3 = 2, 
+IO_LED4 = 3, 
+IO_LED5 = 4, 
+IO_LED6 = 5 
+} io_led_t;
+
 // Use to hold both negative and positive values, to +- 100.
 typedef struct {
     int8_t x;
