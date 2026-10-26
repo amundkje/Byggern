@@ -17,8 +17,8 @@
 #include "can.h"
 #include "mcp2515_registers.h"
 #include "mcp2515.h"
-
-
+#include "oled.h"
+#include "menu.h"
 #include <common/manager.h>
 
 // User Definitions
@@ -26,6 +26,7 @@
 
 // Global Variables
 volatile uint8_t can_message_pending_flag = 0;
+enum gameState current_gamestate = MENU; 
 
 // Remember: Please do not break the code :-)
 
@@ -36,7 +37,7 @@ volatile uint8_t can_message_pending_flag = 0;
 // Initialize stdout
 void init() {
     stdout = fdevopen(uart_putchar, uart_getchar);  //Allows printf to use UART
-    _delay_ms(700);
+    _delay_ms(500);
 
     // Initialise other modules:
     adc_clk_init();
@@ -55,6 +56,12 @@ void init() {
     _delay_ms(5);
 
     can_init(MODE_NORMAL, 0); // Interrupt: 1=enable, 0=disable
+    _delay_ms(5);
+
+    oled_init();
+    _delay_ms(5);    
+
+    menu_init();
     _delay_ms(5);
 }
 
@@ -94,56 +101,23 @@ int main(void) {
     // Test functions to be used later can have a dedicated file in sandbox.
 
 
-
-  
-    
-
-
-    uint32_t counter = 0;
-    while (1) {
-
-       
-        counter +=1;
-        printf("TESTING DIRECTIONAL TRANSLATION. %d \n\r", counter);
-        
-
-       
-        xy_signed pos = read_joystick(0);
-        printf("X: %d -- Y: %d \n\r",pos.x,pos.y);
-
-
-        
-        printf("DIRECTION ENUM:   %d \n\r", get_directional_basic());
-    
-        _delay_ms(500);
-    }
-    
-    
-    while(1) {
-    xy_signed new_pos = read_joystick(0);
-
-    printf("pos x = %d, pos y = %d\n\r", new_pos.x, new_pos.y);
-
-    canMsg msg = {
-        .id = 0xA,
-        .length = 2,
-        .bytes = {new_pos.x, new_pos.y}
-    };
-
-    cantx(msg);
-
-    _delay_ms(1000);
+    while (current_gamestate == MENU) 
+    {
+        current_gamestate = menu_update();
+        _delay_ms(20);
     }
 
-    while (1)
+
+    while (current_gamestate == RUNNING)
     {
         update_arm();
-        _delay_ms(1000);
+        _delay_ms(10);
+
+        // Buttonpress to return to menu
+        //TODO
     }
     
 
-
-   
 
 
 
@@ -154,3 +128,20 @@ int main(void) {
 
     return 0;
 }
+
+
+/*
+    uint32_t counter = 0;
+    while (1) {
+
+        counter +=1;
+        printf("TESTING DIRECTIONAL TRANSLATION. %d \n\r", counter);
+        
+        xy_signed pos = read_joystick(0);
+        printf("X: %d -- Y: %d \n\r",pos.x,pos.y);
+
+        printf("DIRECTION ENUM:   %d \n\r", get_directional_basic());
+    
+        _delay_ms(500);
+    }
+*/

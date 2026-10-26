@@ -13,6 +13,13 @@ typedef struct {
     uint8_t bytes[8];    // Payload (up to 8 bytes)
 } canMsg;
 
+// Enumerated gamestate
+enum gameState {
+    MENU = 0,
+    RUNNING = 1,
+    ERROR = 2
+};
+
 // Enumerated joystick direction
 enum joystick_direction {
     NEUTRAL = 0,

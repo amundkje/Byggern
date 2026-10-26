@@ -29,7 +29,7 @@ xy_signed read_joystick(uint8_t enable_debug_mode) {
 }
 
 
-enum joystick_direction get_directional_basic() {
+enum joystick_direction joystick_get_direction() {
     return joystick_get_directional_basic(read_joystick(0));
 }
 
@@ -38,8 +38,6 @@ enum joystick_direction get_directional_basic() {
  */
 void update_arm(void) {
     xy_signed new_pos = read_joystick(0);
-
-    printf("pos x = %d, pos y = %d", new_pos.x, new_pos.y);
 
     canMsg msg = {
         .id = 0xA,

@@ -3,8 +3,20 @@
 
 #include "node1_structs.h"
 
-void menu_select(directional_pos dir);
+enum menuItems {
+    MENU_START_GAME = 0,
+    MENU_SETTINGS,
+    MENU_CREDITS,
+    MENU_NUM_ITEMS // By having this last; this gives num of items in enum
+};
+
+void menu_init(void);
 void menu_draw(void);
-void menu_update(directional_pos dir);
+enum gameState menu_update(void);
+
+// SOrry eivind
+//void menu_select(directional_pos dir);
+//void menu_draw(void);
+//void menu_update(directional_pos dir);
 
 #endif
