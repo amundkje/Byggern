@@ -36,15 +36,26 @@ volatile uint8_t can_message_pending_flag = 0;
 // Initialize stdout
 void init() {
     stdout = fdevopen(uart_putchar, uart_getchar);  //Allows printf to use UART
+    _delay_ms(700);
 
     // Initialise other modules:
     adc_clk_init();
-    sram_init();
-    uart_init();
-    joystick_init();
-    spi_init();
-    can_init(MODE_NORMAL, 0); // Interrupt: 1=enable, 0=disable
+    _delay_ms(5);
 
+    sram_init();
+    _delay_ms(5);
+
+    uart_init();
+    _delay_ms(5);
+
+    joystick_init();
+    _delay_ms(5);
+
+    spi_init();
+    _delay_ms(5);
+
+    can_init(MODE_NORMAL, 0); // Interrupt: 1=enable, 0=disable
+    _delay_ms(5);
 }
 
 
@@ -71,6 +82,7 @@ int main(void) {
 
     // Init --Please dont put anything above :)
     init();
+    _delay_ms(2000); // FIX TO ADC PROBLEMS ¯\_(ツ)_/¯
 
     // One time code, to see system start.:
     printf("\n\r");
@@ -83,7 +95,7 @@ int main(void) {
 
 
 
-
+  
     
 
 
