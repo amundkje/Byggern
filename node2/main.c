@@ -6,6 +6,8 @@
 #include "uart.h" // Not the same uart.c as node1, this was given on canvas
 #include "can.h"  // Not the same can.c as node1, this was given on canvas
 
+#include "servo.h"
+
 
 #define F_CPU       84000000
 #define UART_BAUD   9600
@@ -62,6 +64,8 @@ void init(void) {
 
     can_init(can_settings, 0); // Interrupt: 1=enable, 0=disable
 
+    servo_init();
+
 }
 
 
@@ -96,6 +100,7 @@ void run_game(void) {
                 break;
 
             case CAN_ID_JOYSTICK:
+                servo_set_pos((int8_t)rx.byte[1]);
                 break;
 
             case CAN_ID_ERROR:

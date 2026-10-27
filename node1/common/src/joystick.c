@@ -74,11 +74,24 @@ void joystick_update_normalisation(
 
 
 xy_signed joystick_normalise_input(xy_unsigned pos_xy) {
+
     xy_signed new_pos_xy;
+
     // printf("Got values x,y: %d : %d \n\r",pos_xy.x,pos_xy.y);
     // printf("Offset xy is: %d  -- %d ..\n\r",OFFSET_VALUE_X,OFFSET_VALUE_Y);
     new_pos_xy.x = (((pos_xy.x-OFFSET_VALUE_X) *100) /MAX_ANALOG_VAL_X);
     new_pos_xy.y = (((pos_xy.y-OFFSET_VALUE_Y)* 100)/MAX_ANALOG_VAL_Y);
+
+    // Keep percentages withing legal range
+    if (new_pos_xy.x < -100) new_pos_xy.x = -100;
+    if (new_pos_xy.x > 100) new_pos_xy.x = 100;
+    if (new_pos_xy.y < -100) new_pos_xy.y = -100;
+    if (new_pos_xy.y > 100) new_pos_xy.y = 100;
+
+    // Send zero if within center deadzone
+    if (abs(new_pos_xy.x) < DEADZONE/2) new_pos_xy.x = 0;
+    if (abs(new_pos_xy.y) < DEADZONE/2) new_pos_xy.y = 0;
+
     return new_pos_xy;
 }
 

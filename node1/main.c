@@ -22,6 +22,8 @@
 #include <common/manager.h>
 #include "io_buttons.h"
 
+#include "brutus_tester/sram_test.c"
+
 // User Definitions
 #define BUFFER_SIZE 255
 
@@ -130,6 +132,7 @@ int main(void) {
     // Test functions to be used later can have a dedicated file in sandbox.
 
     //while(1){ read_joystick(0); _delay_ms(500); }
+
 
     // Loop:
     while(1) {
