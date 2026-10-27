@@ -15,7 +15,8 @@
 // Can IDs
 #define CAN_ID_GAMESTATE    1
 #define CAN_ID_JOYSTICK     2
-#define CAN_ID_ERROR        3
+#define CAN_ID_IO_BUTTONS   3
+#define CAN_ID_ERROR        4
 
 
 // Enumerated gamestate
@@ -84,48 +85,75 @@ void can_printmsg_int(CanMsg m){
 }
 
 /**
- * Game running function
+ * Can bus handler
  */
-void run_game(void) {
+void can_handler(CanMsg *rx) {
 
-    CanMsg rx;
-
-    if (can_rx(&rx)) {
-        // For debug
-        can_printmsg_int(rx);
-
-        // Check received can id 
-        switch (rx.id) {
-            case CAN_ID_GAMESTATE:
-                break;
-
-            case CAN_ID_JOYSTICK:
-                servo_set_pos((int8_t)rx.byte[1]);
-                break;
-
-            case CAN_ID_ERROR:
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    // Action based on current gamestate
-    switch (current_gamestate) {
-        case NODE2_IDLE:
+    // Check received can id 
+    switch (rx->id) {
+        case CAN_ID_GAMESTATE:
+            if (rx->byte[0] == 1) {
+                current_gamestate = NODE2_RUNNING;
+                printf("----Game Running----\n\n\r");
+            }
+            else {
+                current_gamestate = NODE2_IDLE;
+                printf("----Game idle----\n\n\r");
+            }
             break;
-        
-        case NODE2_RUNNING:
+
+        case CAN_ID_JOYSTICK:
+            // For debug
+            can_printmsg_int(*rx);
+
+            if (current_gamestate == NODE2_RUNNING) {
+                servo_set_pos((int8_t)rx->byte[1]);
+            }
             break;
-        
-        case NODE2_ERROR:
+
+        case CAN_ID_IO_BUTTONS:
+            if (current_gamestate == NODE2_RUNNING) {
+                uint8_t left_btns = rx->byte[0];
+                uint8_t right_btns = rx->byte[1];
+                uint8_t nav = rx->byte[2];
+
+                // Check button SR5 (Solenoid pulse)
+                if (left_btns & (1 << 4)) {
+                    // SOlenoid fire at will
+                }               
+            }
+            break;
+
+        case CAN_ID_ERROR:
             break;
 
         default:
             break;
+        }
+}
+
+/**
+ * Game running function
+ */
+void update_game(void) {
+
+    if (current_gamestate != NODE2_RUNNING) {
+        return;
     }
 
+    if (0) { //TODO: ir goal detected
+        printf("----Game over----\n\n\r");
+
+        CanMsg tx = {
+            .id = CAN_ID_GAMESTATE,
+            .length = 1,
+            .byte = {0}
+        };
+
+        can_tx(tx);
+
+        current_gamestate = NODE2_IDLE;
+    }
 
 }
 
@@ -146,7 +174,15 @@ int main()
     // Main loop
     while (1)
     {
-        run_game(); // Main game function
+        
+        CanMsg rx;
+
+        if (can_rx(&rx)) {
+            can_handler(&rx);
+        }  
+
+
+        update_game(); // Main game function
     }
 
     return 0;

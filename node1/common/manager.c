@@ -55,7 +55,7 @@ void update_arm(void) {
         .bytes = {new_pos.x, new_pos.y}
     };
 
-    cantx(msg);
+    can_tx(msg);
 
 }
 

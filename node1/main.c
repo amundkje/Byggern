@@ -30,7 +30,8 @@
 // Can IDs
 #define CAN_ID_GAMESTATE    1
 #define CAN_ID_JOYSTICK     2
-#define CAN_ID_ERROR        3
+#define CAN_ID_IO_BUTTONS   3
+#define CAN_ID_ERROR        4
 
 // Global Variables
 volatile uint8_t can_message_pending_flag = 0;
@@ -90,24 +91,55 @@ void run_game(void) {
     while (current_gamestate == MENU) 
     {
         current_gamestate = menu_update();
-        _delay_ms(20);
+        if (current_gamestate == RUNNING) {
+            canMsg tx = {
+                .id = CAN_ID_GAMESTATE,
+                .length = 1,
+                .bytes = {1}
+            };
+            can_tx(tx);
+        }
+        _delay_ms(50);
     }
 
 
     while (current_gamestate == RUNNING)
     {
         update_arm();
-        _delay_ms(10);
+        _delay_ms(50);
 
         // Buttonpress to return to menu
         Buttons io_buttons = io_button_read();
         if (io_buttons.L7) {
             current_gamestate = MENU;
+
+            // Tell node 2 to go idle
+            canMsg tx = {
+                .id = CAN_ID_GAMESTATE,
+                .length = 1,
+                .bytes = {0}
+            };
+            can_tx(tx);
+
             menu_init();
         }
     }
 }
 
+void can_handler(canMsg *rx) {
+
+    switch (rx->id) {
+        case CAN_ID_GAMESTATE:
+            if (rx->bytes[0] == 0) {
+                current_gamestate = MENU;
+                printf("----Game Over----\n\n\r");
+            }
+            break;
+
+            default:
+                break;
+        }
+}
 
 /**
  * Main function for the Node1 application.
@@ -136,7 +168,15 @@ int main(void) {
 
     // Loop:
     while(1) {
+
+        canMsg rx;
+        
+        if (can_rx(&rx)) {
+            can_handler(&rx);
+        }
+
         run_game();
+        _delay_ms(50);
     };
 
     return 0;
