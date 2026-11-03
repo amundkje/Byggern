@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <avr/io.h>
+#include "node1_structs.h"
 
 #define DC  PB2
 #ifndef OLED_COMMANDS_H
@@ -93,6 +94,7 @@ void oled_init(void);
 void oled_reset(void);
 void oled_home(void);
 void oled_print(const char *text);
+void oled_print_direction(enum joystick_direction direction);
 void oled_goto_column(uint8_t col);
 void oled_goto_line(uint8_t page);
 

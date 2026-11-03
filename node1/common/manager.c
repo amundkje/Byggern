@@ -4,7 +4,7 @@
 #include <avr/io.h> 
 #include <avr/interrupt.h>
 #include <util/delay.h>
-
+#include <oled.h>
 
 // Custom Drivers
 #include "joystick.h"
@@ -62,3 +62,82 @@ void update_arm(void) {
 
 
 
+
+
+
+
+
+
+
+uint8_t calibration_retrieve_max(const char *direction, uint8_t x_axis){
+    uint8_t new_value = 0;
+    uint8_t read_value = 0;
+    oled_reset();
+    oled_print("Hold joystick in direction");
+    oled_print(direction);
+    oled_goto_line(1);
+    oled_print("Hold for 2 seconds..");
+    _delay_ms(500);
+
+
+    uint8_t i = 0;
+    while (i < 3)
+    {
+
+        // Check analog axis wanted:
+        if (x_axis) {
+            read_value = adc_read().joystick.x; 
+        } else {
+            read_value = adc_read().joystick.y; 
+        }
+
+
+        
+        if (read_value > new_value)
+        {
+            new_value = read_value;
+        }
+        _delay_ms(300);
+        i++;
+    }
+    oled_print("Well done 'Applause..'");
+
+    return new_value;
+}
+ 
+    
+    
+   
+    
+    
+
+
+
+/**
+ * TODO: Apply dummyproofing, feedback system, outer_margin and deadzone support.
+ */
+void run_autocalibration() {
+    pos_2D_unsigned new_profile;
+    // PreCalib-info.
+    oled_reset();
+    oled_home();
+    oled_print("Running autocalibration...");
+    oled_goto_line(1);
+    oled_print("First we do the x-plane, ready up gimbo");
+    _delay_ms(700); //Apply fitting delay.
+    //Gather new profile
+   uint8_t y_up = calibration_retrieve_max("UPWARDS",0);
+   _delay_ms(200); //Apply fitting delay.
+   uint8_t x_r = calibration_retrieve_max("RIGHT",1);
+   _delay_ms(200); //Apply fitting delay.
+   uint8_t y_down = calibration_retrieve_max("DOWN",0);
+   _delay_ms(200); //Apply fitting delay.
+   uint8_t x_l = calibration_retrieve_max("LEFT",1);
+   _delay_ms(200); //Apply fitting delay.
+    
+    //Apply new profile
+    joystick_update_normalisation(x_l,x_r,y_down,y_up,10,20);
+    //Give confirmation to user
+    oled_reset();
+    oled_print("You can now stop fiddeling with my joystick..");
+}

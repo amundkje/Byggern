@@ -79,7 +79,9 @@ enum gameState menu_update(void) {
                     // To be implemented
                 }
                 else if (current_selected == MENU_CALIBRATE) {
-                    // To be implemented
+                    run_autocalibration();
+        
+                    menu_draw(); //TODO: Should be automated on page return.
                 }
                 else if (current_selected == MENU_CREDITS) {
                     // To be implemented
