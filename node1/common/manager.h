@@ -12,6 +12,6 @@ enum joystick_direction joystick_get_direction();
 void update_arm(void);
 
 void run_autocalibration();
-uint8_t calibration_retrieve_max(const char *direction, uint8_t x_axis);
+uint8_t calibration_retrieve(const char *direction, uint8_t on_x_axis, uint8_t is_max_val);
 
 #endif
