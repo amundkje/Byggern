@@ -22,7 +22,6 @@
 #include <common/manager.h>
 #include "io_buttons.h"
 
-#include "brutus_tester/sram_test.c"
 
 // User Definitions
 #define BUFFER_SIZE 255
@@ -31,7 +30,7 @@
 #define CAN_ID_GAMESTATE    1
 #define CAN_ID_JOYSTICK     2
 #define CAN_ID_IO_BUTTONS   3
-#define CAN_ID_ERROR        4
+#define CAN_ID_ERROR        99
 
 // Global Variables
 volatile uint8_t can_message_pending_flag = 0;
@@ -45,20 +44,15 @@ enum gameState current_gamestate = MENU;
 
 // Initialize stdout
 void init() {
+    // Initialise low-level peripherals before drivers that depend on them.
+    uart_init();
     stdout = fdevopen(uart_putchar, uart_getchar);  //Allows printf to use UART
-    _delay_ms(500);
-
-    // Initialise other modules:
+    _delay_ms(5);
+    
     adc_clk_init();
     _delay_ms(5);
 
     sram_init();
-    _delay_ms(5);
-
-    uart_init();
-    _delay_ms(5);
-
-    joystick_init();
     _delay_ms(5);
 
     spi_init();
@@ -69,6 +63,9 @@ void init() {
 
     oled_init();
     _delay_ms(5);    
+
+    joystick_init();
+    _delay_ms(5);
 
     menu_init();
     _delay_ms(5);
@@ -166,6 +163,7 @@ int main(void) {
     //while(1){ read_joystick(0); _delay_ms(500); }
 
 
+   
     // Loop:
     while(1) {
 

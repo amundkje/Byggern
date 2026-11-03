@@ -18,7 +18,7 @@
 #define CAN_ID_GAMESTATE    1
 #define CAN_ID_JOYSTICK     2
 #define CAN_ID_IO_BUTTONS   3
-#define CAN_ID_ERROR        4
+#define CAN_ID_ERROR        99
 
 # define IR_DETECT_THRESHOLD 220 // uint8. When adc detect level bellow
 
