@@ -69,23 +69,27 @@ void update_arm(void) {
 
 
 
-uint8_t calibration_retrieve_max(const char *direction, uint8_t x_axis){
-    uint8_t new_value = 0;
+uint8_t calibration_retrieve(const char *direction, uint8_t on_x_axis, uint8_t is_max_val){
+    uint8_t new_value = is_max_val ? 0 : UINT8_MAX;
     uint8_t read_value = 0;
     oled_reset();
-    oled_print("Hold joystick in direction");
+    oled_print("JOYSTICK:   ");
     oled_print(direction);
     oled_goto_line(1);
-    oled_print("Hold for 2 seconds..");
-    _delay_ms(500);
+    oled_print("Hold: 2 seconds..");
+    _delay_ms(3000);
+    oled_reset();
+    oled_home();
+    
+   
 
 
     uint8_t i = 0;
-    while (i < 3)
+    while (i < 15)
     {
 
         // Check analog axis wanted:
-        if (x_axis) {
+        if (on_x_axis) {
             read_value = adc_read().joystick.x; 
         } else {
             read_value = adc_read().joystick.y; 
@@ -93,13 +97,19 @@ uint8_t calibration_retrieve_max(const char *direction, uint8_t x_axis){
 
 
         
-        if (read_value > new_value)
+        if (is_max_val&& read_value > new_value)
+        {
+            new_value = read_value;
+        }else if (!is_max_val && read_value < new_value)
         {
             new_value = read_value;
         }
-        _delay_ms(300);
+        
+        _delay_ms(200);
         i++;
     }
+    oled_reset();
+    oled_home();
     oled_print("Well done 'Applause..'");
 
     return new_value;
@@ -117,27 +127,55 @@ uint8_t calibration_retrieve_max(const char *direction, uint8_t x_axis){
  * TODO: Apply dummyproofing, feedback system, outer_margin and deadzone support.
  */
 void run_autocalibration() {
-    pos_2D_unsigned new_profile;
+    char value_text[4];
+
     // PreCalib-info.
     oled_reset();
     oled_home();
     oled_print("Running autocalibration...");
     oled_goto_line(1);
-    oled_print("First we do the x-plane, ready up gimbo");
-    _delay_ms(700); //Apply fitting delay.
+    oled_print("Ready up gimbo");
+    _delay_ms(5000); //Apply fitting delay.
     //Gather new profile
-   uint8_t y_up = calibration_retrieve_max("UPWARDS",0);
-   _delay_ms(200); //Apply fitting delay.
-   uint8_t x_r = calibration_retrieve_max("RIGHT",1);
-   _delay_ms(200); //Apply fitting delay.
-   uint8_t y_down = calibration_retrieve_max("DOWN",0);
-   _delay_ms(200); //Apply fitting delay.
-   uint8_t x_l = calibration_retrieve_max("LEFT",1);
-   _delay_ms(200); //Apply fitting delay.
+   uint8_t y_up = calibration_retrieve("UPWARDS",0,1);
+   oled_reset();
+   oled_home();
+   snprintf(value_text, sizeof(value_text), "%u", y_up);
+   oled_print(value_text);
+   _delay_ms(500); //Apply fitting delay.
+
+
+
+   uint8_t x_r = calibration_retrieve("RIGHT",1,1);
+   snprintf(value_text, sizeof(value_text), "%u", x_r);
+   oled_print(value_text);
+   _delay_ms(500); //Apply fitting delay.
+
+
+
+   uint8_t y_down = calibration_retrieve("DOWN",0,0);
+   snprintf(value_text, sizeof(value_text), "%u", y_down);
+   oled_print(value_text);
+   _delay_ms(500); //Apply fitting delay.
+
+
+
+   uint8_t x_l = calibration_retrieve("LEFT",1,0);
+   snprintf(value_text, sizeof(value_text), "%u", x_l);
+   oled_print(value_text);
+   _delay_ms(500); //Apply fitting delay.
     
+
+
+
+
     //Apply new profile
-    joystick_update_normalisation(x_l,x_r,y_down,y_up,10,20);
+    joystick_update_normalisation(x_l,x_r,y_down,y_up,1,30);
     //Give confirmation to user
     oled_reset();
+    oled_home();
     oled_print("You can now stop fiddeling with my joystick..");
+    _delay_ms(5000);
+    oled_reset();
+    oled_home();
 }

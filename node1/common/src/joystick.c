@@ -62,6 +62,15 @@ void joystick_update_normalisation(
     MAX_ANALOG_VAL_X = max_value_x-OFFSET_VALUE_X+outer_margin;
     MAX_ANALOG_VAL_Y = max_value_y-OFFSET_VALUE_Y+outer_margin;
 
+
+    // Tiny failsafe...
+    if (MAX_ANALOG_VAL_X == 0) {
+        MAX_ANALOG_VAL_X = 1;
+    }
+    if (MAX_ANALOG_VAL_Y == 0) {
+        MAX_ANALOG_VAL_Y = 1;
+    }
+
     DEADZONE = deadzone; // percentage.
     
     //Just for debug:
