@@ -1,3 +1,10 @@
+#ifndef IR_H
+#define IR_H
+
+#include <stdint.h>
 #include "sam.h"
-void adc_init(uint8_t channel);
-uint32_t adc_read(uint8_t channel);
+
+void ir_init(void);
+uint32_t ir_read(void);
+
+#endif

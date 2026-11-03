@@ -103,26 +103,25 @@ void run_game(void) {
     }
 
 
-    while (current_gamestate == RUNNING)
-    {
-        update_arm();
-        _delay_ms(50);
 
-        // Buttonpress to return to menu
-        Buttons io_buttons = io_button_read();
-        if (io_buttons.L7) {
-            current_gamestate = MENU;
+    update_arm();
+    _delay_ms(50);
 
-            // Tell node 2 to go idle
-            canMsg tx = {
-                .id = CAN_ID_GAMESTATE,
-                .length = 1,
-                .bytes = {0}
-            };
-            can_tx(tx);
+    // Buttonpress to return to menu
+    Buttons io_buttons = io_button_read();
+    if (io_buttons.L7) {
+        current_gamestate = MENU;
 
-            menu_init();
-        }
+        // Tell node 2 to go idle
+        canMsg tx = {
+            .id = CAN_ID_GAMESTATE,
+            .length = 1,
+            .bytes = {0}
+        };
+        can_tx(tx);
+
+        menu_init();
+
     }
 }
 
@@ -132,6 +131,7 @@ void can_handler(canMsg *rx) {
         case CAN_ID_GAMESTATE:
             if (rx->bytes[0] == 0) {
                 current_gamestate = MENU;
+                menu_init();
                 printf("----Game Over----\n\n\r");
             }
             break;

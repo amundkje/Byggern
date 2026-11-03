@@ -5,8 +5,10 @@
 
 #include "uart.h" // Not the same uart.c as node1, this was given on canvas
 #include "can.h"  // Not the same can.c as node1, this was given on canvas
-
 #include "servo.h"
+#include "encoder.h"
+#include "ir.h"
+#include "motor.h"
 
 
 #define F_CPU       84000000
@@ -17,6 +19,8 @@
 #define CAN_ID_JOYSTICK     2
 #define CAN_ID_IO_BUTTONS   3
 #define CAN_ID_ERROR        4
+
+# define IR_DETECT_THRESHOLD 220 // uint8. When adc detect level bellow
 
 
 // Enumerated gamestate
@@ -67,6 +71,12 @@ void init(void) {
 
     servo_init();
 
+    encoder_init();
+
+    ir_init();
+
+    motor_init();
+
 }
 
 
@@ -106,8 +116,14 @@ void can_handler(CanMsg *rx) {
             // For debug
             can_printmsg_int(*rx);
 
+            int8_t speed;
             if (current_gamestate == NODE2_RUNNING) {
+                // Set servo (racket rotation)
                 servo_set_pos((int8_t)rx->byte[1]);
+
+                // Set motor
+
+                
             }
             break;
 
@@ -141,7 +157,9 @@ void update_game(void) {
         return;
     }
 
-    if (0) { //TODO: ir goal detected
+    // Check for game over when ball crosses ir line
+    uint8_t ir_level = ir_read();
+    if (ir_level < IR_DETECT_THRESHOLD) { 
         printf("----Game over----\n\n\r");
 
         CanMsg tx = {
@@ -171,6 +189,7 @@ int main()
 
 
 
+
     // Main loop
     while (1)
     {
@@ -187,3 +206,25 @@ int main()
 
     return 0;
 }
+
+/**
+ * REMOVE
+ * 
+ *     while (1) {
+        int16_t pos = encoder_read();
+        printf("Encoder pos: %d\n\r", pos);
+
+        delay_by_counting();
+    }
+
+
+    adc_init(7);
+    while (1) {
+
+    
+    uint8_t read = adc_read(7);
+    printf("ADC value: %d\n\r", read);
+    
+    delay_by_counting();
+    }
+ */
