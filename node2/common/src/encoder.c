@@ -33,8 +33,20 @@ void encoder_init(void) {
 
 }
 
-
+/**
+ * Return current encoder value (motor position)
+ */
 int16_t encoder_read(void) {
     // Read counter value from the TC2_ch0 counter register
     return (int16_t)TC2->TC_CHANNEL[0].TC_CV;
 }
+
+
+/**
+ * Set current encoder value to zero.
+ * Used for calibration
+ */
+void encoder_set_zero_point(void) {
+    TC2->TC_CHANNEL[0].TC_CCR = TC_CCR_SWTRG;
+}
+

@@ -9,6 +9,7 @@
 #include "encoder.h"
 #include "ir.h"
 #include "motor.h"
+#include "pid.h"
 
 
 #define F_CPU       84000000
@@ -18,6 +19,8 @@
 #define CAN_ID_GAMESTATE    1
 #define CAN_ID_JOYSTICK     2
 #define CAN_ID_IO_BUTTONS   3
+#define CAN_ID_SCORE        4
+#define CAN_ID_SETTINGS     5
 #define CAN_ID_ERROR        99
 
 # define IR_DETECT_THRESHOLD 220 // uint8. When adc detect level bellow
@@ -27,7 +30,9 @@
 enum gameState {
     NODE2_IDLE = 0,
     NODE2_RUNNING,
-    NODE2_ERROR
+    NODE2_ERROR,
+    NODE2_CALIBRATING,
+    NODE2_RESETTING
 };
 
 enum gameState current_gamestate = NODE2_IDLE;
@@ -77,11 +82,15 @@ void init(void) {
 
     motor_init();
 
+    // Set timer interrupt every 10 ms.
+    // Parameter is amount of ticks between interrupts.
+    SysTick_Config(SystemCoreClock / 100); 
+
 }
 
 
 void delay_by_counting(void) {
-    for (int i = 0; i < 2000000; i++);
+    for (volatile int i = 0; i < 2000000; i++);
 }
 void can_printmsg_int(CanMsg m){
     printf("CanMsg(id:%d, length:%d, data:{", m.id, m.length);
@@ -94,6 +103,25 @@ void can_printmsg_int(CanMsg m){
     printf("})\n\r");
 }
 
+
+/**
+ * Handle Game over
+ * TODO handle score
+ */
+void game_over(uint8_t score) {
+
+    // Tell node1 the game is over
+    CanMsg tx = {
+        .id = CAN_ID_GAMESTATE,
+        .length = 2,
+        .byte = {0, score}
+    };
+    can_tx(tx);
+
+    // Reset motor
+    pid_center_motor();
+}
+
 /**
  * Can bus handler
  */
@@ -102,11 +130,22 @@ void can_handler(CanMsg *rx) {
     // Check received can id 
     switch (rx->id) {
         case CAN_ID_GAMESTATE:
-            if (rx->byte[0] == 1) {
+            // If busy, send node1 back to menu
+            if (current_gamestate == NODE2_CALIBRATING ||
+                current_gamestate == NODE2_RESETTING) {
+                    game_over(0);
+                }
+            
+            // Start game if byte[0] == 1
+            else if (rx->byte[0] == 1) {
                 current_gamestate = NODE2_RUNNING;
+                pid_set_enable(1);
                 printf("----Game Running----\n\n\r");
             }
             else {
+                current_gamestate = NODE2_RESETTING;
+                printf("Game stopped. Resetting motor... \n\r");
+                pid_center_motor();
                 current_gamestate = NODE2_IDLE;
                 printf("----Game idle----\n\n\r");
             }
@@ -143,6 +182,17 @@ void can_handler(CanMsg *rx) {
         case CAN_ID_ERROR:
             break;
 
+        case CAN_ID_SCORE:
+            break;
+
+        case CAN_ID_SETTINGS:
+            current_gamestate = NODE2_CALIBRATING;
+            motor_calibrate();
+            current_gamestate = NODE2_RESETTING;
+            pid_center_motor();
+            current_gamestate = NODE2_IDLE;
+            break;
+
         default:
             break;
         }
@@ -162,18 +212,22 @@ void update_game(void) {
     if (ir_level < IR_DETECT_THRESHOLD) { 
         printf("----Game over----\n\n\r");
 
-        CanMsg tx = {
-            .id = CAN_ID_GAMESTATE,
-            .length = 1,
-            .byte = {0}
-        };
-
-        can_tx(tx);
+        game_over(0);
 
         current_gamestate = NODE2_IDLE;
     }
 
 }
+
+/**
+ * This function is called by timer interrupt
+ * Setup in init function
+ * Set to 100 calls a second (Every 10 ms) 
+ * */ 
+void SysTick_Handler(void) {
+    pid_update();
+}
+
 
 int main()
 {

@@ -5,5 +5,6 @@
 
 void encoder_init(void);
 int16_t encoder_read(void);
+void encoder_set_zero_point(void);
 
 #endif

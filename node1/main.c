@@ -30,6 +30,8 @@
 #define CAN_ID_GAMESTATE    1
 #define CAN_ID_JOYSTICK     2
 #define CAN_ID_IO_BUTTONS   3
+#define CAN_ID_SCORE        4
+#define CAN_ID_SETTINGS     5
 #define CAN_ID_ERROR        99
 
 // Global Variables
