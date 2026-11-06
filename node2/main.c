@@ -23,7 +23,7 @@
 #define CAN_ID_SETTINGS     5
 #define CAN_ID_ERROR        99
 
-# define IR_DETECT_THRESHOLD 220 // uint8. When adc detect level bellow
+# define IR_DETECT_THRESHOLD 3500 // adc is 12 bit: range 0 - 4096
 
 
 // Enumerated gamestate
@@ -36,6 +36,13 @@ enum gameState {
 };
 
 enum gameState current_gamestate = NODE2_IDLE;
+static uint8_t calibrated_flag = 0;
+
+// Variables for safe data receive during CAN interrupt
+static volatile int8_t latest_joystic_x = 0;
+static volatile int8_t latest_joystic_y = 0;
+static volatile uint8_t solenoid_fire_request = 0;
+static volatile uint8_t game_stopped_flag = 0;
 
 
 
@@ -72,7 +79,7 @@ void init(void) {
         .smp = 0
     };
 
-    can_init(can_settings, 0); // Interrupt: 1=enable, 0=disable
+    can_init(can_settings, 1); // Interrupt: 1=enable, 0=disable
 
     servo_init();
 
@@ -92,6 +99,8 @@ void init(void) {
 void delay_by_counting(void) {
     for (volatile int i = 0; i < 2000000; i++);
 }
+
+// For debug purposes
 void can_printmsg_int(CanMsg m){
     printf("CanMsg(id:%d, length:%d, data:{", m.id, m.length);
     if(m.length){
@@ -110,6 +119,8 @@ void can_printmsg_int(CanMsg m){
  */
 void game_over(uint8_t score) {
 
+    current_gamestate = NODE2_RESETTING;
+
     // Tell node1 the game is over
     CanMsg tx = {
         .id = CAN_ID_GAMESTATE,
@@ -120,6 +131,8 @@ void game_over(uint8_t score) {
 
     // Reset motor
     pid_center_motor();
+
+    current_gamestate = NODE2_IDLE;
 }
 
 /**
@@ -129,73 +142,56 @@ void can_handler(CanMsg *rx) {
 
     // Check received can id 
     switch (rx->id) {
-        case CAN_ID_GAMESTATE:
-            // If busy, send node1 back to menu
-            if (current_gamestate == NODE2_CALIBRATING ||
-                current_gamestate == NODE2_RESETTING) {
-                    game_over(0);
-                }
-            
-            // Start game if byte[0] == 1
-            else if (rx->byte[0] == 1) {
-                current_gamestate = NODE2_RUNNING;
-                pid_set_enable(1);
-                printf("----Game Running----\n\n\r");
+    case CAN_ID_GAMESTATE:
+        // If busy, do nothing
+        if (current_gamestate == NODE2_CALIBRATING ||
+            current_gamestate == NODE2_RESETTING) {
+                break;
             }
-            else {
-                current_gamestate = NODE2_RESETTING;
-                printf("Game stopped. Resetting motor... \n\r");
-                pid_center_motor();
-                current_gamestate = NODE2_IDLE;
-                printf("----Game idle----\n\n\r");
-            }
-            break;
-
-        case CAN_ID_JOYSTICK:
-            // For debug
-            can_printmsg_int(*rx);
-
-            int8_t speed;
-            if (current_gamestate == NODE2_RUNNING) {
-                // Set servo (racket rotation)
-                servo_set_pos((int8_t)rx->byte[1]);
-
-                // Set motor
-
-                
-            }
-            break;
-
-        case CAN_ID_IO_BUTTONS:
-            if (current_gamestate == NODE2_RUNNING) {
-                uint8_t left_btns = rx->byte[0];
-                uint8_t right_btns = rx->byte[1];
-                uint8_t nav = rx->byte[2];
-
-                // Check button SR5 (Solenoid pulse)
-                if (left_btns & (1 << 4)) {
-                    // SOlenoid fire at will
-                }               
-            }
-            break;
-
-        case CAN_ID_ERROR:
-            break;
-
-        case CAN_ID_SCORE:
-            break;
-
-        case CAN_ID_SETTINGS:
-            current_gamestate = NODE2_CALIBRATING;
-            motor_calibrate();
-            current_gamestate = NODE2_RESETTING;
-            pid_center_motor();
-            current_gamestate = NODE2_IDLE;
-            break;
-
-        default:
-            break;
+        
+        // Start game if byte[0] == 1
+        else if (rx->byte[0] == 1) {
+            current_gamestate = NODE2_RUNNING;
         }
+        // Stop game if byte[0] is 0 
+        else {
+            game_stopped_flag = 1;
+        }
+        break;
+
+    case CAN_ID_JOYSTICK:
+        // For debug
+        can_printmsg_int(*rx);
+
+        // Save latest joystick values
+        latest_joystic_x = (int8_t)rx->byte[0];
+        latest_joystic_y = (int8_t)rx->byte[1];
+
+        break;
+
+    case CAN_ID_IO_BUTTONS:
+
+        // Check Solenoid fire command received 
+        if (rx->byte[0] & (1 << 4)) {
+            solenoid_fire_request = 1;
+        }
+        break;
+
+    case CAN_ID_ERROR:
+        // To be properly implemented
+        current_gamestate = NODE2_RESETTING;
+        break;
+
+    case CAN_ID_SCORE:
+        break;
+
+    case CAN_ID_SETTINGS:
+        current_gamestate = NODE2_CALIBRATING;
+        break;
+
+    default:
+        break;
+    }
 }
 
 /**
@@ -203,19 +199,77 @@ void can_handler(CanMsg *rx) {
  */
 void update_game(void) {
 
-    if (current_gamestate != NODE2_RUNNING) {
-        return;
-    }
+    switch (current_gamestate){
+    case NODE2_IDLE:
+        // Wait for start command
+        break;
 
-    // Check for game over when ball crosses ir line
-    uint8_t ir_level = ir_read();
-    if (ir_level < IR_DETECT_THRESHOLD) { 
-        printf("----Game over----\n\n\r");
+    case NODE2_RUNNING:
 
-        game_over(0);
+        if (!calibrated_flag) {
+            printf("Run Motor Calibration please!\n\r");
+            current_gamestate = NODE2_IDLE;
+            break;
+        }
 
+        if (game_stopped_flag) {
+            game_stopped_flag = 0;
+            game_over(0);
+            break;
+        }
+
+        pid_set_enable(1);
+
+        // Update racked servo
+        servo_set_pos(latest_joystic_y);
+
+        // Update motor target refrence
+        pid_set_pos_refrence(latest_joystic_x);
+
+        if (solenoid_fire_request) {
+            solenoid_fire_request = 0; // Reset flag
+            //solenoid_pulse();
+        }
+
+        // TODO goal counter
+        // Check IR sensor for goal
+        uint16_t ir_level = ir_read();
+        if (ir_level < IR_DETECT_THRESHOLD) { 
+            printf("----Game over----\n\n\r");
+
+            game_over(0);
+            break;
+        }
+
+        break;
+
+    case NODE2_ERROR:
+        
+        break;
+
+    case NODE2_CALIBRATING:
+
+        pid_set_enable(0);
+        motor_calibrate();
+        calibrated_flag = 1;
         current_gamestate = NODE2_IDLE;
+
+        break;
+
+    case NODE2_RESETTING:
+        printf("Reseting Motor to Center...\n\r");
+        pid_center_motor();
+
+        printf("Motor Centering Complete\n\r");
+        current_gamestate = NODE2_IDLE;
+        
+        break;
+    
+    default:
+        current_gamestate = NODE2_IDLE;
+        break;
     }
+
 
 }
 
@@ -226,6 +280,18 @@ void update_game(void) {
  * */ 
 void SysTick_Handler(void) {
     pid_update();
+}
+
+/**
+ * Interrupt Service Routine
+ * Called on recieved CAN message
+ */
+void CAN0_Handler(void) {
+    CanMsg rx;
+
+    if (can_rx(&rx)) {
+        can_handler(&rx);
+    }
 }
 
 
@@ -247,15 +313,9 @@ int main()
     // Main loop
     while (1)
     {
-        
-        CanMsg rx;
-
-        if (can_rx(&rx)) {
-            can_handler(&rx);
-        }  
-
 
         update_game(); // Main game function
+
     }
 
     return 0;
@@ -281,4 +341,10 @@ int main()
     
     delay_by_counting();
     }
+
+
+    CanMsg rx;
+    if (can_rx(&rx)) {
+        can_handler(&rx);
+    }  
  */

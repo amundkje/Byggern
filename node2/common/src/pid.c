@@ -73,6 +73,8 @@ void pid_center_motor(void) {
 void motor_calibrate(void) {
     printf("Starting Motor Auto-Calibration... \n\r");
 
+    pid_set_enable(1);
+    
     // Move motor Left to set encoder 0 value
     motor_set_speed(-30);
 
