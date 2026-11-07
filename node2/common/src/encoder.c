@@ -38,7 +38,8 @@ void encoder_init(void) {
  */
 int16_t encoder_read(void) {
     // Read counter value from the TC2_ch0 counter register
-    return (int16_t)TC2->TC_CHANNEL[0].TC_CV;
+    // Returning negative value so left is negative encoder direction
+    return -(int16_t)TC2->TC_CHANNEL[0].TC_CV;
 }
 
 

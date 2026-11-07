@@ -89,9 +89,7 @@ void init(void) {
 
     motor_init();
 
-    // Set timer interrupt every 10 ms.
-    // Parameter is amount of ticks between interrupts.
-    SysTick_Config(SystemCoreClock / 100); 
+    pid_TC0_timer_init();
 
 }
 
@@ -128,6 +126,8 @@ void game_over(uint8_t score) {
         .byte = {0, score}
     };
     can_tx(tx);
+
+    printf("Game Over\n\r");
 
     // Reset motor
     pid_center_motor();
@@ -186,7 +186,9 @@ void can_handler(CanMsg *rx) {
         break;
 
     case CAN_ID_SETTINGS:
-        current_gamestate = NODE2_CALIBRATING;
+        if (rx->byte[0] == 1) {
+            current_gamestate = NODE2_CALIBRATING;
+        }
         break;
 
     default:
@@ -214,6 +216,7 @@ void update_game(void) {
 
         if (game_stopped_flag) {
             game_stopped_flag = 0;
+            printf("Game stopped\n\r");
             game_over(0);
             break;
         }
@@ -249,10 +252,17 @@ void update_game(void) {
 
     case NODE2_CALIBRATING:
 
-        pid_set_enable(0);
         motor_calibrate();
+                //debug
         calibrated_flag = 1;
         current_gamestate = NODE2_IDLE;
+
+        CanMsg tx = {
+            .id = CAN_ID_SETTINGS,
+            .length = 0,
+            .byte = {}
+        };
+        can_tx(tx);
 
         break;
 
@@ -278,8 +288,13 @@ void update_game(void) {
  * Setup in init function
  * Set to 100 calls a second (Every 10 ms) 
  * */ 
-void SysTick_Handler(void) {
-    pid_update();
+void TC0_Handler(void) {
+    // Read and reset status/flag
+    uint32_t status = TC0->TC_CHANNEL[0].TC_SR;
+
+    if (status & TC_SR_CPCS) {
+        pid_update(); // Run PID regulator at periodic intervals
+    }
 }
 
 /**
@@ -323,6 +338,11 @@ int main()
 
 /**
  * REMOVE
+ * 
+ * 
+ * 
+ * 
+ * 
  * 
  *     while (1) {
         int16_t pos = encoder_read();

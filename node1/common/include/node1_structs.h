@@ -15,9 +15,21 @@ typedef struct {
 
 // Enumerated gamestate
 enum gameState {
-    MENU = 0,
-    RUNNING = 1,
-    ERROR = 2
+    NODE1_MENU = 0,
+    NODE1_RUNNING,
+    NODE1_CALIBRATING,
+    NODE1_GAME_OVER,
+    NODE1_CREDITS,
+    NODE1_ERROR
+};
+
+enum menuItems {
+    MENU_NONE = -1,
+    MENU_START_GAME = 0,
+    MENU_CALIBRATE_JOYSTICK,
+    MENU_CALIBRATE_MOTOR,
+    MENU_CREDITS,
+    MENU_NUM_ITEMS // By having this last; this gives num of items in enum
 };
 
 // Enumerated joystick direction

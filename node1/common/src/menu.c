@@ -20,11 +20,11 @@ void menu_draw(void)
 
     oled_goto_line(1);
     oled_goto_column(0);
-    oled_print(current_selected == MENU_SETTINGS ? "> Settings" : "  Settings");
+    oled_print(current_selected == MENU_CALIBRATE_JOYSTICK ? "> Calibrate joystick" : "  Calibrate joystick"); 
 
     oled_goto_line(2);
     oled_goto_column(0);
-    oled_print(current_selected == MENU_CALIBRATE ? "> Calibrate joystick" : "  Calibrate joystick");    
+    oled_print(current_selected == MENU_CALIBRATE_MOTOR ? "> Calibrate motor" : "  Calibrate motor");   
 
     oled_goto_line(3);
     oled_goto_column(0);
@@ -32,77 +32,54 @@ void menu_draw(void)
 }
 
 void menu_init(void) {
+    prev_dir = NEUTRAL;
+    current_selected = MENU_START_GAME;
     oled_reset();
     menu_draw();
 }
 
-enum gameState menu_update(void) {
+enum menuItems menu_update(void) {
 
     // Read current joystick direction
     enum joystick_direction dir = joystick_get_direction();
-    enum gameState next_state = MENU;
 
     // If joystick has not been moved to a new direction, return
     if (dir != prev_dir && dir != NEUTRAL) {
 
         switch (dir) {
-            // Move up
-            case UP:
-                if (current_selected > 0) {
-                    current_selected--;
-                    menu_draw();
-                }
-                break;
+        // Move up
+        case UP:
+            if (current_selected > 0) {
+                current_selected--;
+                menu_draw();
+            }
+            break;
 
-            // Move down
-            case DOWN:
-                if (current_selected < MENU_NUM_ITEMS-1) {
-                    current_selected++;
-                    menu_draw();
-                }
-                break;
+        // Move down
+        case DOWN:
+            if (current_selected < MENU_NUM_ITEMS-1) {
+                current_selected++;
+                menu_draw();
+            }
+            break;
 
-            // Go back from sub-menu
-            case LEFT:
-                // To be implemented
-                break;
+        // Go back from sub-menu
+        case LEFT:
+            // To be implemented
+            break;
 
-            // Right nudge selects current menu item
-            case RIGHT: 
-                if (current_selected == MENU_START_GAME) {
-                    oled_reset();
-                    oled_home();
-                    oled_print(" Playing Game ");
-                    next_state = RUNNING;
-                }
-                else if (current_selected == MENU_SETTINGS) {
-                    // To be implemented
-                }
-                else if (current_selected == MENU_CALIBRATE) {
-                    run_autocalibration();
-        
-                    menu_draw(); //TODO: Should be automated on page return.
-                }
-                else if (current_selected == MENU_CREDITS) {
-                    // To be implemented
-                    oled_reset();
-                    oled_home();
-                    oled_print("Made by three monkeys");
-                    _delay_ms(5000);
-                    oled_reset();
-                    oled_home();
-                    menu_draw();
-                }
-                break;
+        // Right nudge selects current menu item
+        case RIGHT: 
+            return current_selected;
 
-            default:
-                break;
+        default:
+            break;
         }
     }
 
     prev_dir = dir;
 
-    return next_state;
+    return MENU_NONE;
 }
 
 
@@ -110,7 +87,29 @@ enum gameState menu_update(void) {
 
 
 
-/* Sorry eivind
+/* 
+    if (current_selected == MENU_START_GAME) {
+        oled_reset();
+        oled_home();
+        oled_print(" Playing Game ");
+        return MENU_START_GAME;
+    }
+    else if (current_selected == MENU_CALIBRATE_MOTOR) {
+        return NODE1_CALIBRATING;
+    }
+    else if (current_selected == MENU_CALIBRATE_JOYSTICK) {
+        run_autocalibration();
+
+        menu_draw(); //TODO: Should be automated on page return.
+    }
+    else if (current_selected == MENU_CREDITS) {
+        // To be implemented
+        return NODE1_CREDITS;
+    }
+
+
+
+Sorry eivind
 void menu_select(directional_pos dir){
     if (dir.up && selected > 0){
         selected--;

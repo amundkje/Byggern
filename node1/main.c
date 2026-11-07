@@ -35,14 +35,13 @@
 #define CAN_ID_ERROR        99
 
 // Global Variables
-volatile uint8_t can_message_pending_flag = 0;
-enum gameState current_gamestate = MENU; 
+static volatile uint8_t can_message_pending_flag = 0;
+static volatile enum gameState current_gamestate = NODE1_MENU; 
+static volatile uint8_t last_game_score = 0;
+static volatile uint8_t lives_remaining = 0;
+
 
 // Remember: Please do not break the code :-)
-
-
-// Place Test functions here.
-// --
 
 // Initialize stdout
 void init() {
@@ -60,7 +59,7 @@ void init() {
     spi_init();
     _delay_ms(5);
 
-    can_init(MODE_NORMAL, 0); // Interrupt: 1=enable, 0=disable
+    can_init(MODE_NORMAL, 1); // Interrupt: 1=enable, 0=disable
     _delay_ms(5);
 
     oled_init();
@@ -87,57 +86,156 @@ ISR(INT0_vect) {
  * Gamelogic
  */
 void run_game(void) {
-    while (current_gamestate == MENU) 
-    {
-        current_gamestate = menu_update();
-        if (current_gamestate == RUNNING) {
+
+    enum joystick_direction dir = joystick_get_direction();
+    Buttons io_buttons = io_button_read();
+
+    switch (current_gamestate) {
+    case NODE1_MENU:
+        enum menuItems menu_choice = menu_update();
+
+        if (menu_choice == MENU_START_GAME) {
             canMsg tx = {
                 .id = CAN_ID_GAMESTATE,
                 .length = 1,
                 .bytes = {1}
             };
             can_tx(tx);
+            
+            current_gamestate = NODE1_RUNNING;
+            oled_reset();
+            oled_print("Game starting...\n\r");
+            printf("Starting game\n\r");
+
         }
-        _delay_ms(50);
-    }
 
+        else if (menu_choice == MENU_CALIBRATE_MOTOR) {
+            canMsg tx = {
+                .id = CAN_ID_SETTINGS,
+                .length = 1,
+                .bytes = {1}
+            };
+            can_tx(tx);
 
+            current_gamestate = NODE1_CALIBRATING;
+            printf("Sending motor calibratin request\n\r");
+            oled_reset();
+            oled_print("Waiting for Motor Calibration...\n\r");
+        }
 
-    update_arm();
-    _delay_ms(50);
+        else if (menu_choice == MENU_CALIBRATE_JOYSTICK) {
+            run_autocalibration();
+            menu_init();
+        }
 
-    // Buttonpress to return to menu
-    Buttons io_buttons = io_button_read();
-    if (io_buttons.L7) {
-        current_gamestate = MENU;
+        else if (menu_choice == MENU_CREDITS) {
+            current_gamestate = NODE1_CREDITS;
+            oled_reset();
+            oled_print("Made by:");
+            oled_goto_line(1);
+            oled_goto_column(0);
+            oled_print("   Scooby Doo");
+            oled_goto_line(2);
+            oled_goto_column(0);
+            oled_print("   Donkey");
+            oled_goto_line(3);
+            oled_goto_column(0);
+            oled_print("   Tuxedo Mask");
+        }
+        break;
 
-        // Tell node 2 to go idle
-        canMsg tx = {
-            .id = CAN_ID_GAMESTATE,
-            .length = 1,
-            .bytes = {0}
-        };
-        can_tx(tx);
+    case NODE1_RUNNING:
 
+        update_arm();
+
+        if (io_buttons.L7) {
+            current_gamestate = NODE1_MENU;
+
+            canMsg tx = {
+                .id = CAN_ID_GAMESTATE,
+                .length = 1,
+                .bytes = {0}
+            };
+            can_tx(tx);
+
+            menu_init();
+        }
+        break;
+
+    case NODE1_CALIBRATING:
+
+        if (dir == LEFT) {
+            current_gamestate = NODE1_MENU;
+            menu_init();
+        }
+        else if (io_buttons.L7) {
+            current_gamestate = NODE1_MENU;
+            menu_init();
+        }
+        break;
+
+    case NODE1_GAME_OVER:
+  
+        if (dir == LEFT) {
+            current_gamestate = NODE1_MENU;
+            menu_init();
+        }
+        
+        else if (io_buttons.L7) {
+            current_gamestate = NODE1_MENU;
+            menu_init();
+        }
+        break;
+
+    case NODE1_CREDITS:
+        
+        if (dir == LEFT) {
+            current_gamestate = NODE1_MENU;
+            menu_init();
+        }
+        
+        else if (io_buttons.L7) {
+            current_gamestate = NODE1_MENU;
+            menu_init();
+        }
+        break;
+
+    default:
+        current_gamestate = NODE1_MENU;
         menu_init();
-
+        break;
     }
 }
 
 void can_handler(canMsg *rx) {
 
     switch (rx->id) {
-        case CAN_ID_GAMESTATE:
-            if (rx->bytes[0] == 0) {
-                current_gamestate = MENU;
-                menu_init();
-                printf("----Game Over----\n\n\r");
-            }
-            break;
+    case CAN_ID_GAMESTATE:
+        if (rx->bytes[0] == 0) {
+            last_game_score = rx->bytes[1];
+            current_gamestate = NODE1_GAME_OVER;
+            oled_reset();
+            oled_print("Game Over");
+            oled_goto_line(1);
+            oled_print("Score: ");
+            // IMPLEMENT SCORE
 
-            default:
-                break;
+            printf("----Game Over----\n\n\r");
         }
+        break;
+    
+    case CAN_ID_SETTINGS:
+        printf("Motor Calibration Complete\n\r");
+        current_gamestate = NODE1_MENU;
+        break; 
+
+    case CAN_ID_SCORE:
+        lives_remaining = rx->bytes[0];
+        break;
+
+    default:
+        break;
+    }
 }
 
 /**
@@ -162,17 +260,16 @@ int main(void) {
     // Please delete test functions when no longer needed.
     // Test functions to be used later can have a dedicated file in sandbox.
 
-    //while(1){ read_joystick(0); _delay_ms(500); }
-
-
    
     // Loop:
     while(1) {
 
-        canMsg rx;
-        
-        if (can_rx(&rx)) {
-            can_handler(&rx);
+        if (can_message_pending_flag) {
+            canMsg rx;
+            if (can_rx(&rx)) {
+                can_handler(&rx);
+            }
+            can_message_pending_flag = 0;
         }
 
         run_game();
@@ -184,6 +281,13 @@ int main(void) {
 
 
 /*
+        canMsg rx;
+        if (can_rx(&rx)) {
+            can_handler(&rx);
+        }
+
+
+
     uint32_t counter = 0;
     while (1) {
 

@@ -19,12 +19,42 @@ static float sum_error = 0.0f; // Error sum for integrating part
 // PID enable flag
 static uint8_t pid_enabled = 0;
 
+// Calibration
+#define MOTOR_CALIBRATE_STABLE_COUNT    3
+#define MOTOR_CALIBRATE_SPEED           30
+
 
 void pid_init(float kp, float ki, float sample_time_sec) {
     Kp = kp;
     Ki = ki;
     dt  = sample_time_sec;
     sum_error = 0.0f;
+
+}
+
+// Used to generate periodic interrupt to run pid controller
+void pid_TC0_timer_init(void) {
+
+    // Activate TC0 peripheral clock
+    PMC->PMC_PCER0 |= (1 << ID_TC0);
+
+    // Configure TC0 ch0 to waveform mode with reset on compare match.
+    // clk3 = 2 625 000 Hz
+    TC0->TC_CHANNEL[0].TC_CMR = TC_CMR_TCCLKS_TIMER_CLOCK3 |
+                                TC_CMR_WAVE |
+                                TC_CMR_WAVSEL_UP_RC;
+    
+    // Set compare value to achieve 100 Hz (10 ms)
+    TC0->TC_CHANNEL[0].TC_RC = 26250;
+
+    // Activate RC match interrupt
+    TC0->TC_CHANNEL[0].TC_IER = TC_IER_CPCS;
+
+    // Activate TC0 interrupt in NVIC
+    NVIC_EnableIRQ(TC0_IRQn);
+
+    // Start clock and trigger timer
+    TC0->TC_CHANNEL[0].TC_CCR = TC_CCR_CLKEN | TC_CCR_SWTRG;
 
 }
 
@@ -73,16 +103,16 @@ void pid_center_motor(void) {
 void motor_calibrate(void) {
     printf("Starting Motor Auto-Calibration... \n\r");
 
-    pid_set_enable(1);
+    pid_set_enable(0);
     
     // Move motor Left to set encoder 0 value
-    motor_set_speed(-30);
+    motor_set_speed(-MOTOR_CALIBRATE_SPEED);
 
     int16_t prev_pos = encoder_read();
     int8_t stable_count = 0;
 
     // Wait untill ecoder position stop changing.
-    while (stable_count < 10) {
+    while (stable_count < MOTOR_CALIBRATE_STABLE_COUNT) {
 
         // Simple delay
         for (volatile int i = 0; i < 100000; i++);
@@ -103,12 +133,12 @@ void motor_calibrate(void) {
     printf("Left limit set to 0 \n\r");
 
     // Move motor Right to find max encoder value
-    motor_set_speed(30);
+    motor_set_speed(MOTOR_CALIBRATE_SPEED);
     stable_count = 0;
     prev_pos = encoder_read();
 
     // Wait untill ecoder position stop changing.
-    while (stable_count < 10) {
+    while (stable_count < MOTOR_CALIBRATE_STABLE_COUNT) {
 
         // Simple delay
         for (volatile int i = 0; i < 100000; i++);
@@ -129,12 +159,10 @@ void motor_calibrate(void) {
 
     // Calculate midpoint
     refrence_pos = encoder_max / 2;
+    printf("Encoder Calibration Complete!\n\r");
 
     // Return motor to center pos
     pid_center_motor();
-
-    printf("Encoder Calibration Complete!\n\r");
-
 }
 
 
