@@ -36,7 +36,7 @@ enum gameState {
 };
 
 enum gameState current_gamestate = NODE2_IDLE;
-static uint8_t calibrated_flag = 0;
+static volatile  uint8_t calibrated_flag = 0;
 
 // Variables for safe data receive during CAN interrupt
 static volatile int8_t latest_joystic_x = 0;
@@ -129,10 +129,7 @@ void game_over(uint8_t score) {
 
     printf("Game Over\n\r");
 
-    // Reset motor
-    pid_center_motor();
-
-    current_gamestate = NODE2_IDLE;
+    current_gamestate = NODE2_RESETTING;
 }
 
 /**
@@ -143,6 +140,9 @@ void can_handler(CanMsg *rx) {
     // Check received can id 
     switch (rx->id) {
     case CAN_ID_GAMESTATE:
+        // for debug
+        can_printmsg(*rx);
+
         // If busy, do nothing
         if (current_gamestate == NODE2_CALIBRATING ||
             current_gamestate == NODE2_RESETTING) {
@@ -155,13 +155,14 @@ void can_handler(CanMsg *rx) {
         }
         // Stop game if byte[0] is 0 
         else {
-            game_stopped_flag = 1;
+            current_gamestate = NODE2_RESETTING;
+            printf("Stop Received\n\r");
         }
         break;
 
     case CAN_ID_JOYSTICK:
         // For debug
-        can_printmsg_int(*rx);
+        //can_printmsg_int(*rx);
 
         // Save latest joystick values
         latest_joystic_x = (int8_t)rx->byte[0];
@@ -214,13 +215,6 @@ void update_game(void) {
             break;
         }
 
-        if (game_stopped_flag) {
-            game_stopped_flag = 0;
-            printf("Game stopped\n\r");
-            game_over(0);
-            break;
-        }
-
         pid_set_enable(1);
 
         // Update racked servo
@@ -236,7 +230,7 @@ void update_game(void) {
 
         // TODO goal counter
         // Check IR sensor for goal
-        uint16_t ir_level = ir_read();
+        uint16_t ir_level = 4000; //ir_read();
         if (ir_level < IR_DETECT_THRESHOLD) { 
             printf("----Game over----\n\n\r");
 

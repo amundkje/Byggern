@@ -104,7 +104,7 @@ void run_game(void) {
             
             current_gamestate = NODE1_RUNNING;
             oled_reset();
-            oled_print("Game starting...\n\r");
+            oled_print("Game starting...");
             printf("Starting game\n\r");
 
         }
@@ -118,9 +118,9 @@ void run_game(void) {
             can_tx(tx);
 
             current_gamestate = NODE1_CALIBRATING;
-            printf("Sending motor calibratin request\n\r");
+            printf("Sending motor calibrating request\n\r");
             oled_reset();
-            oled_print("Waiting for Motor Calibration...\n\r");
+            oled_print("Waiting for Motor Calibration...");
         }
 
         else if (menu_choice == MENU_CALIBRATE_JOYSTICK) {
@@ -146,8 +146,7 @@ void run_game(void) {
 
     case NODE1_RUNNING:
 
-        update_arm();
-
+        // If SL7 pressed, stop game.
         if (io_buttons.L7) {
             current_gamestate = NODE1_MENU;
 
@@ -158,8 +157,16 @@ void run_game(void) {
             };
             can_tx(tx);
 
+            printf("Game stopped\n\r");
+
             menu_init();
         }
+
+        // Send joystick and button info to node 1
+        else {
+            update_arm();
+        }
+    
         break;
 
     case NODE1_CALIBRATING:
@@ -227,6 +234,7 @@ void can_handler(canMsg *rx) {
     case CAN_ID_SETTINGS:
         printf("Motor Calibration Complete\n\r");
         current_gamestate = NODE1_MENU;
+        menu_init();
         break; 
 
     case CAN_ID_SCORE:
