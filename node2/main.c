@@ -141,7 +141,7 @@ void can_handler(CanMsg *rx) {
     switch (rx->id) {
     case CAN_ID_GAMESTATE:
         // for debug
-        can_printmsg(*rx);
+        //can_printmsg(*rx);
 
         // If busy, do nothing
         if (current_gamestate == NODE2_CALIBRATING ||
@@ -162,7 +162,7 @@ void can_handler(CanMsg *rx) {
 
     case CAN_ID_JOYSTICK:
         // For debug
-        //can_printmsg_int(*rx);
+        can_printmsg_int(*rx);
 
         // Save latest joystick values
         latest_joystic_x = (int8_t)rx->byte[0];
@@ -258,13 +258,17 @@ void update_game(void) {
         };
         can_tx(tx);
 
+        printf("Sent calibration OK\n\r");
+
         break;
 
     case NODE2_RESETTING:
+        /* Need integrator part first
         printf("Reseting Motor to Center...\n\r");
         pid_center_motor();
-
         printf("Motor Centering Complete\n\r");
+        */
+       pid_set_enable(0);
         current_gamestate = NODE2_IDLE;
         
         break;

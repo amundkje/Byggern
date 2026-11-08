@@ -5,8 +5,8 @@
 #include "encoder.h"
 
 // PI controller weigths
-static float Kp = 1.0f;
-static float Ki = 0.05f;
+static float Kp = 0.03f; // Experimetally found
+static float Ki = 0.01f; // Experimetally found
 static float dt = 0.01f; // 10 ms sampletime
 
 #define INTEGRATE_MAX_SUM 500.0f
@@ -21,7 +21,7 @@ static uint8_t pid_enabled = 0;
 
 // Calibration
 #define MOTOR_CALIBRATE_STABLE_COUNT    3
-#define MOTOR_CALIBRATE_SPEED           30
+#define MOTOR_CALIBRATE_SPEED           40
 
 
 void pid_init(float kp, float ki, float sample_time_sec) {
@@ -144,7 +144,7 @@ void motor_calibrate(void) {
         for (volatile int i = 0; i < 100000; i++);
 
         int16_t current_pos = encoder_read();
-        if (abs(current_pos - prev_pos) < 2) {
+        if (abs(current_pos - prev_pos) < 4) {
             stable_count++;
         }
         else {
@@ -162,7 +162,7 @@ void motor_calibrate(void) {
     printf("Encoder Calibration Complete!\n\r");
 
     // Return motor to center pos
-    pid_center_motor();
+    //pid_center_motor();
 }
 
 
@@ -174,7 +174,7 @@ void pid_set_pos_refrence(int8_t joystick_x_percent) {
     if (joystick_x_percent < -100) joystick_x_percent = -100;
     if (joystick_x_percent > 100) joystick_x_percent = 100;
     
-    refrence_pos = ((int32_t)(joystick_x_percent + 100) * encoder_max) / 2;
+    refrence_pos = ((int32_t)(joystick_x_percent + 100) * encoder_max) / 200;
 }
 
 /**
@@ -207,6 +207,8 @@ void pid_update(void){
     if (u > 100.0f) u = 100.0f;
     if (u < -100.0f) u = -100.0f;
 
-    // Update motor speed
+    // Update motor speed.
+    // Negative signed because of direction set 
+    // as left/rigth positive/negative encoder direction.
     motor_set_speed((int8_t)u);
 }   
