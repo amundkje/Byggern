@@ -5,8 +5,8 @@
 #include "encoder.h"
 
 // PI controller weigths
-static float Kp = 0.03f; // Experimetally found
-static float Ki = 0.01f; // Experimetally found
+static float Kp = 0.06f; // Experimetally found
+static float Ki = 0.03f; // Experimetally found
 static float dt = 0.01f; // 10 ms sampletime
 
 #define INTEGRATE_MAX_SUM 500.0f

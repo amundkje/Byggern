@@ -10,6 +10,7 @@
 #include "ir.h"
 #include "motor.h"
 #include "pid.h"
+#include "solenoid.h"
 
 
 #define F_CPU       84000000
@@ -89,7 +90,10 @@ void init(void) {
 
     motor_init();
 
+    solenoid_init();
+
     pid_TC0_timer_init();
+
 
 }
 
@@ -171,11 +175,16 @@ void can_handler(CanMsg *rx) {
         break;
 
     case CAN_ID_IO_BUTTONS:
+        printf("Fire signal received\n\r");
+        solenoid_fire_request = 1;
 
+        /*
         // Check Solenoid fire command received 
         if (rx->byte[0] & (1 << 4)) {
+            printf("Fire signal received\n\r");
             solenoid_fire_request = 1;
         }
+        */
         break;
 
     case CAN_ID_ERROR:
@@ -225,7 +234,7 @@ void update_game(void) {
 
         if (solenoid_fire_request) {
             solenoid_fire_request = 0; // Reset flag
-            //solenoid_pulse();
+            solenoid_trigger();
         }
 
         // TODO goal counter
@@ -284,7 +293,7 @@ void update_game(void) {
 /**
  * This function is called by timer interrupt
  * Setup in init function
- * Set to 100 calls a second (Every 10 ms) 
+ * @note Set to 100 calls a second (Every 10 ms) 
  * */ 
 void TC0_Handler(void) {
     // Read and reset status/flag
@@ -292,6 +301,7 @@ void TC0_Handler(void) {
 
     if (status & TC_SR_CPCS) {
         pid_update(); // Run PID regulator at periodic intervals
+        solenoid_update();
     }
 }
 
