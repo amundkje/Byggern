@@ -83,6 +83,23 @@ ISR(INT0_vect) {
 }
 
 /**
+ * Wrapper to send can packets
+ */
+void can_send(uint32_t id, uint8_t length, const uint8_t *data)
+{
+    canMsg tx = {
+        .id = id,
+        .length = length
+    };
+
+    for (uint8_t i = 0; i < length && i < 8; i++) {
+        tx.bytes[i] = data[i];
+    }
+
+    can_tx(tx);
+}
+
+/**
  * Gamelogic
  */
 void run_game(void) {
@@ -95,12 +112,9 @@ void run_game(void) {
         enum menuItems menu_choice = menu_update();
 
         if (menu_choice == MENU_START_GAME) {
-            canMsg tx = {
-                .id = CAN_ID_GAMESTATE,
-                .length = 1,
-                .bytes = {1}
-            };
-            can_tx(tx);
+
+            uint8_t data[] = {1};
+            can_send(CAN_ID_GAMESTATE, 1, data);
             
             current_gamestate = NODE1_RUNNING;
             oled_reset();
@@ -110,12 +124,10 @@ void run_game(void) {
         }
 
         else if (menu_choice == MENU_CALIBRATE_MOTOR) {
-            canMsg tx = {
-                .id = CAN_ID_SETTINGS,
-                .length = 1,
-                .bytes = {1}
-            };
-            can_tx(tx);
+
+            uint8_t data[] = {1};
+            can_send(CAN_ID_SETTINGS, 1, data);
+
 
             current_gamestate = NODE1_CALIBRATING;
             printf("Sending motor calibrating request\n\r");
@@ -150,16 +162,20 @@ void run_game(void) {
         if (io_buttons.L7) {
             current_gamestate = NODE1_MENU;
 
-            canMsg tx = {
-                .id = CAN_ID_GAMESTATE,
-                .length = 1,
-                .bytes = {0}
-            };
-            can_tx(tx);
+            uint8_t data[] = {0};
+            can_send(CAN_ID_GAMESTATE, 1, data);
 
             printf("Game stopped\n\r");
 
             menu_init();
+        }
+
+        else if (io_buttons.R5) {
+            
+            uint8_t data[] = {io_buttons.right};
+            can_send(CAN_ID_IO_BUTTONS, 1, data);
+            printf("Fire Solenoid\n\r");
+            
         }
 
         // Send joystick and button info to node 1
