@@ -24,21 +24,12 @@
 #include "io_buttons.h"
 
 
-// User Definitions
-//..
-
-// Can IDs
-#define CAN_ID_GAMESTATE    1
-#define CAN_ID_JOYSTICK     2
-#define CAN_ID_IO_BUTTONS   3
-#define CAN_ID_HEALTH        4
-#define CAN_ID_SETTINGS     5
-#define CAN_ID_ERROR        99
-
 // Global Variables
 static volatile uint8_t can_message_pending_flag = 0;
 static volatile enum gameState current_gamestate = NODE1_MENU; 
 static volatile uint8_t last_game_score = 0;
+static volatile uint8_t hp_remaining = 0;
+static volatile uint8_t hp_max = 3;
 
 
 // Remember: Please do not break the code :-)
@@ -112,14 +103,26 @@ void run_game(void) {
         enum menuItems menu_choice = menu_update();
 
         if (menu_choice == MENU_START_GAME) {
+            printf_P(PSTR("Starting game\n\r"));
+
+
 
             uint8_t data[] = {1};
             can_send(CAN_ID_GAMESTATE, 1, data);
             
             current_gamestate = NODE1_RUNNING;
+            hp_remaining = hp_max;
+
+             char hp_rem_char[2];
+            snprintf(hp_rem_char, sizeof(hp_rem_char), "%u", hp_remaining);
+
+
             oled_reset();
-            oled_print("Game starting...");
-            printf_P(PSTR("Starting game\n\r"));
+            oled_print("Good luck");
+            oled_goto_line(1);
+            oled_goto_column(0);
+            oled_print("Lives Remaining: ");
+            oled_print(hp_rem_char);
 
         }
 
@@ -185,6 +188,8 @@ void run_game(void) {
     
         break;
 
+
+
     case NODE1_CALIBRATING:
 
         if (dir == LEFT) {
@@ -237,8 +242,8 @@ void can_handler(canMsg *rx) {
             last_game_score = rx->bytes[1];
             current_gamestate = NODE1_GAME_OVER;
             
-            /* char last_score[4]; // Up to "255" plus '\0'
-            // snprintf(last_score, sizeof(last_score), "%u", (unsigned)last_game_score);
+            char last_score[4]; // Up to "255" plus '\0'
+            snprintf(last_score, sizeof(last_score), "%u", (unsigned)last_game_score);
             oled_reset();
             oled_print("Game Over");
             oled_goto_line(1);
@@ -256,6 +261,21 @@ void can_handler(canMsg *rx) {
         menu_init();
         break; 
 
+    case CAN_ID_HEALTH:
+       
+        
+        hp_remaining = rx->bytes[0]; // get hp count
+
+
+        oled_reset();
+        oled_print("Lives Remaining: "); 
+        char hp_text[4];
+        snprintf(hp_text, sizeof(hp_text), "%u", hp_remaining);
+        oled_print(hp_text);
+            
+
+        break;
+        
     default:
         
         break;

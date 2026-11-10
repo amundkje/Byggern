@@ -1,8 +1,18 @@
 #ifndef NODE1_STRUCTS_H
 #define NODE1_STRUCTS_H
 
-
 #include <stdint.h> //Used for *int8_t
+
+
+// Can IDs
+#define CAN_ID_GAMESTATE    1
+#define CAN_ID_HEALTH       2
+#define CAN_ID_JOYSTICK     3
+#define CAN_ID_SETTINGS     15
+#define CAN_ID_IO_BUTTONS   20
+#define CAN_ID_ERROR        99 //Future :)
+
+
 
 
 // Struct representing the data in a CAN-frame

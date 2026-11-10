@@ -17,12 +17,6 @@
 #include "mcp2515_registers.h"
 #include "mcp2515.h"
 
-// Can IDs
-#define CAN_ID_GAMESTATE    1
-#define CAN_ID_JOYSTICK     2
-#define CAN_ID_ERROR        3
-
-
 
 /**
  * Reads new ADC input and returns a normalised joystick input.
