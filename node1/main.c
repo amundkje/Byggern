@@ -261,11 +261,7 @@ void can_handler(canMsg *rx) {
         oled_print("Game running...");
         oled_goto_line(1);
         oled_print("Lives remainging: ");
-<<<<<<< HEAD
         oled_print(score);
-=======
-        //oled_print(lives_remaining);
->>>>>>> 6bef07e744065c0dd218aee132912998576ae0e1
         break;
 
     default:
