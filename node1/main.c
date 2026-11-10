@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <avr/io.h> 
 #include <avr/interrupt.h>
+#include <avr/pgmspace.h>
 #include <util/delay.h>
 
 // Custom Drivers
@@ -30,7 +31,6 @@
 #define CAN_ID_GAMESTATE    1
 #define CAN_ID_JOYSTICK     2
 #define CAN_ID_IO_BUTTONS   3
-#define CAN_ID_SCORE        4
 #define CAN_ID_SETTINGS     5
 #define CAN_ID_ERROR        99
 
@@ -38,7 +38,6 @@
 static volatile uint8_t can_message_pending_flag = 0;
 static volatile enum gameState current_gamestate = NODE1_MENU; 
 static volatile uint8_t last_game_score = 0;
-static volatile uint8_t lives_remaining = 0;
 
 
 // Remember: Please do not break the code :-)
@@ -119,7 +118,7 @@ void run_game(void) {
             current_gamestate = NODE1_RUNNING;
             oled_reset();
             oled_print("Game starting...");
-            printf("Starting game\n\r");
+            printf_P(PSTR("Starting game\n\r"));
 
         }
 
@@ -130,7 +129,7 @@ void run_game(void) {
 
 
             current_gamestate = NODE1_CALIBRATING;
-            printf("Sending motor calibrating request\n\r");
+            printf_P(PSTR("Sending motor calibrating request\n\r"));
             oled_reset();
             oled_print("Waiting for Motor Calibration...");
         }
@@ -165,7 +164,7 @@ void run_game(void) {
             uint8_t data[] = {0};
             can_send(CAN_ID_GAMESTATE, 1, data);
 
-            printf("Game stopped\n\r");
+            printf_P(PSTR("Game stopped\n\r"));
 
             menu_init();
         }
@@ -174,7 +173,7 @@ void run_game(void) {
             
             uint8_t data[] = {io_buttons.right};
             can_send(CAN_ID_IO_BUTTONS, 1, data);
-            printf("Fire Solenoid\n\r");
+            printf_P(PSTR("Fire Solenoid\n\r"));
             
         }
 
@@ -242,30 +241,19 @@ void can_handler(canMsg *rx) {
             oled_reset();
             oled_print("Game Over");
             oled_goto_line(1);
+            oled_goto_column(0);
             oled_print("Score: ");
             oled_print(last_score);
-            // IMPLEMENT SCORE
 
-            printf("----Game Over----\n\n\r");
+            printf_P(PSTR("----Game Over----\n\n\r"));
         }
         break;
     
     case CAN_ID_SETTINGS:
-        printf("Motor Calibration Complete\n\r");
+        printf_P(PSTR("Motor Calibration Complete\n\r"));
         current_gamestate = NODE1_MENU;
         menu_init();
         break; 
-
-    case CAN_ID_SCORE:
-        lives_remaining = rx->bytes[0];
-        char score[4]; // Up to "255" plus '\0'
-        snprintf(score, sizeof(score), "%u", (unsigned)lives_remaining);
-        oled_reset();
-        oled_print("Game running...");
-        oled_goto_line(1);
-        oled_print("Lives remainging: ");
-        oled_print(score);
-        break;
 
     default:
         break;
@@ -286,8 +274,8 @@ int main(void) {
     _delay_ms(2000); // FIX TO ADC PROBLEMS ¯\_(ツ)_/¯
 
     // One time code, to see system start.:
-    printf("\n\r");
-    printf("Hello There\n\r");
+    printf_P(PSTR("\n\r"));
+    printf_P(PSTR("Hello There\n\r"));
     //printf("GENERAL KENOBI!!\n\n\r");
 
     // Run test functions here.
