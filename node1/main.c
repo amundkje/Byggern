@@ -255,11 +255,13 @@ void can_handler(canMsg *rx) {
 
     case CAN_ID_SCORE:
         lives_remaining = rx->bytes[0];
+        char score[4]; // Up to "255" plus '\0'
+        snprintf(score, sizeof(score), "%u", (unsigned)lives_remaining);
         oled_reset();
-        oled_print("Game running...")
+        oled_print("Game running...");
         oled_goto_line(1);
         oled_print("Lives remainging: ");
-        oled_print(lives_remaining);
+        oled_print(score);
         break;
 
     default:
