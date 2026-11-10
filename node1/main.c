@@ -256,10 +256,10 @@ void can_handler(canMsg *rx) {
     case CAN_ID_SCORE:
         lives_remaining = rx->bytes[0];
         oled_reset();
-        oled_print("Game running...")
+        oled_print("Game running...");
         oled_goto_line(1);
         oled_print("Lives remainging: ");
-        oled_print(lives_remaining);
+        //oled_print(lives_remaining);
         break;
 
     default:
