@@ -237,10 +237,13 @@ void can_handler(canMsg *rx) {
         if (rx->bytes[0] == 0) {
             last_game_score = rx->bytes[1];
             current_gamestate = NODE1_GAME_OVER;
+            char last_score[4]; // Up to "255" plus '\0'
+            snprintf(last_score, sizeof(last_score), "%u", (unsigned)last_game_score);
             oled_reset();
             oled_print("Game Over");
             oled_goto_line(1);
             oled_print("Score: ");
+            oled_print(last_score);
             // IMPLEMENT SCORE
 
             printf("----Game Over----\n\n\r");
@@ -261,11 +264,7 @@ void can_handler(canMsg *rx) {
         oled_print("Game running...");
         oled_goto_line(1);
         oled_print("Lives remainging: ");
-<<<<<<< HEAD
         oled_print(score);
-=======
-        //oled_print(lives_remaining);
->>>>>>> 6bef07e744065c0dd218aee132912998576ae0e1
         break;
 
     default:
