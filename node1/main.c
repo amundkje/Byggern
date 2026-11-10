@@ -25,12 +25,13 @@
 
 
 // User Definitions
-#define BUFFER_SIZE 255
+//..
 
 // Can IDs
 #define CAN_ID_GAMESTATE    1
 #define CAN_ID_JOYSTICK     2
 #define CAN_ID_IO_BUTTONS   3
+#define CAN_ID_HEALTH        4
 #define CAN_ID_SETTINGS     5
 #define CAN_ID_ERROR        99
 
@@ -230,14 +231,14 @@ void run_game(void) {
 }
 
 void can_handler(canMsg *rx) {
-
     switch (rx->id) {
     case CAN_ID_GAMESTATE:
         if (rx->bytes[0] == 0) {
             last_game_score = rx->bytes[1];
             current_gamestate = NODE1_GAME_OVER;
-            char last_score[4]; // Up to "255" plus '\0'
-            snprintf(last_score, sizeof(last_score), "%u", (unsigned)last_game_score);
+            
+            /* char last_score[4]; // Up to "255" plus '\0'
+            // snprintf(last_score, sizeof(last_score), "%u", (unsigned)last_game_score);
             oled_reset();
             oled_print("Game Over");
             oled_goto_line(1);
@@ -256,6 +257,7 @@ void can_handler(canMsg *rx) {
         break; 
 
     default:
+        
         break;
     }
 }

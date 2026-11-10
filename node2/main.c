@@ -19,11 +19,11 @@
 
 // Can IDs
 #define CAN_ID_GAMESTATE    1
-#define CAN_ID_JOYSTICK     2
-#define CAN_ID_IO_BUTTONS   3
-#define CAN_ID_SCORE        4
-#define CAN_ID_SETTINGS     5
-#define CAN_ID_ERROR        99
+#define CAN_ID_HEALTH       2
+#define CAN_ID_JOYSTICK     3
+#define CAN_ID_SETTINGS     15
+#define CAN_ID_IO_BUTTONS   20
+#define CAN_ID_ERROR        99 //Future :)
 
 #define SOLENOID_BUTTON (1 << 4)
 
@@ -56,7 +56,7 @@ static volatile uint8_t IR_below_threshold_count = 0;
 static volatile uint8_t hp_loss_max = 3;
 static volatile uint8_t hp_loss_count = 0;
 static volatile uint8_t ball_reset_count = 0;
-
+static volatile uint8_t IR_THRESHOLD_MULTIPLIER = 6;
 
 void init(void) {
 
@@ -102,7 +102,7 @@ void init(void) {
     ir_init();
     delay_by_counting(500000);
     IR_rest_val = ir_read();
-    IR_DETECT_THRESHOLD = IR_rest_val*0.7;
+    IR_DETECT_THRESHOLD = IR_rest_val * 0.6;
     printf("IR_REST_VAL:   %d", IR_rest_val);
 
     motor_init();
@@ -133,7 +133,7 @@ void can_printmsg_int(CanMsg m){
 
 /**
  * Handle Game over
- * TODO handle score
+ * TODO: IMPLEMENT SCORE
  */
 void game_over(uint8_t score) {
 
@@ -172,6 +172,7 @@ void can_handler(CanMsg *rx) {
         // Start game if byte[0] == 1
         else if (rx->byte[0] == 1) {
             current_gamestate = NODE2_RUNNING;
+            printf("Game RUNNING");
             pid_set_enable(1);
         }
         // Stop game if byte[0] is 0 
@@ -209,7 +210,7 @@ void can_handler(CanMsg *rx) {
         current_gamestate = NODE2_RESETTING;
         break;
 
-    case CAN_ID_SCORE:
+    case CAN_ID_HEALTH:
         break;
 
     case CAN_ID_SETTINGS:
@@ -258,7 +259,17 @@ void update_game(void) {
         //TODO: extract!!
         if (IR_below_threshold_count >= 5) { //Confirmed Trigger: 
             hp_loss_count++;
-            printf("You failed! -1 heart\n\r");
+            uint8_t current_hp = hp_loss_max-hp_loss_count;
+            printf("HP:   %d \n\r",current_hp);
+
+             CanMsg tx = { //TODO: extract into a wrapper method?
+            .id = CAN_ID_HEALTH ,
+            .length = 1,
+            .byte = {current_hp}
+            }; can_tx(tx);
+        
+
+            printf("You failed! -1 HP\n\r");
 
 
 
@@ -274,6 +285,7 @@ void update_game(void) {
                
             while(1){  //DO NOTHING :)
                 uint32_t read = ir_read();
+                // printf("IR lazy: %d \n\r",read);
                 if (read >= IR_DETECT_THRESHOLD) {
                     ball_reset_count++;
                 } else ball_reset_count = 0;
@@ -285,6 +297,7 @@ void update_game(void) {
         }
 
         uint32_t read = ir_read();
+        // printf("IR running: %d \n\r",read);
         // printf("IR_VALUE: %d \n\r",read);
         
         if (read <= IR_DETECT_THRESHOLD) {  //TODO: Extract
