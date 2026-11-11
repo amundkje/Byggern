@@ -23,7 +23,6 @@ void can_init(uint8_t mode, uint8_t rxInterrupt) {
     // Set bit 5-6 in RXB0CTRL HIGH
     mcp2515_bit_modify(MCP_RXB0CTRL, 0x60, 0x60);
 
-
     // Activate RB0 interrupt signal on msg recieve to MCU
     if (rxInterrupt) {
         mcp2515_write(MCP_CANINTE, MCP_RX0IE);
@@ -116,3 +115,21 @@ uint8_t can_rx(canMsg* msg) {
     return 0; // No new message in RXB0
 }
 
+
+/**
+ * Wrapper to send can packets
+ * @param data Prepare a list: (data[] = {1,2,3})
+ */
+void can_send(uint32_t id, uint8_t length, const uint8_t *data)
+{
+    canMsg tx = {
+        .id = id,
+        .length = length
+    };
+
+    for (uint8_t i = 0; i < length && i < 8; i++) {
+        tx.bytes[i] = data[i];
+    }
+
+    can_tx(tx);
+}

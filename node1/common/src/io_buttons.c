@@ -1,3 +1,5 @@
+// io_buttons.c
+
 #include <stdint.h>
 #include <stdio.h>
 #include <avr/io.h> 
@@ -11,7 +13,6 @@
 #define IO_CMD_BUTTONS 0x04
 #define IO_CMD_LED_ONOFF 0X05
 #define IO_CMD_LED_PWM 0X06
-
 
 
 /**
@@ -91,29 +92,3 @@ void io_led_pwm(io_led_t led, uint8_t brightness) {
 
     spi_deselect();
 }
-
-
-
-/** OLD. PROB REMOVE
- * 
- * Function to detect button pressed edge. 
- * Button bit is only 1 when button had a rising edge.
- 
-uint8_t io_button_pressed(void) {
-
-    static uint8_t prev_state = 0;
-
-    spi_select(SPI_SLAVE_IO);
-
-    // Send dummy byte to receive button state.
-    uint8_t current_state = spi_transceive(0xFF);
-    spi_deselect();
-
-    uint8_t button_pressed = current_state & ~prev_state;
-
-    prev_state = current_state;
-    
-    return button_pressed;
-}
-
-*/

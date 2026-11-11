@@ -1,18 +1,18 @@
+// menu.c
+
 #include "menu.h"
 #include "oled.h"
 #include "node1_structs.h"
 #include "../manager.h"
-#include <util/delay.h>
-//#define menu_cnt 3
 
-//static uint8_t selected = 0;
-//static int8_t previous_menu_direction = 0;
 
 static enum menuItems current_selected = MENU_START_GAME;
 static enum joystick_direction prev_dir = NEUTRAL;
 
 
-
+/**
+ * This function draw the content of the menu based on selected item.
+ */
 void menu_draw(void)
 {
     oled_home();
@@ -31,6 +31,8 @@ void menu_draw(void)
     oled_print(current_selected == MENU_CREDITS ? "> Credits" : "  Credits");
 }
 
+
+// Reset menu
 void menu_init(void) {
     prev_dir = NEUTRAL;
     current_selected = MENU_START_GAME;
@@ -38,6 +40,12 @@ void menu_init(void) {
     menu_draw();
 }
 
+
+/**
+ * This function handles navigating the menu and is called
+ * every loop of the main game locig function as long as node 1
+ * is in the menu state.
+ */
 enum menuItems menu_update(void) {
 
     // Read current joystick direction
@@ -66,6 +74,7 @@ enum menuItems menu_update(void) {
         // Go back from sub-menu
         case LEFT:
             // To be implemented
+            // No sub menu yet
             break;
 
         // Right nudge selects current menu item
@@ -81,56 +90,3 @@ enum menuItems menu_update(void) {
 
     return MENU_NONE;
 }
-
-
-
-
-
-
-/* 
-    if (current_selected == MENU_START_GAME) {
-        oled_reset();
-        oled_home();
-        oled_print(" Playing Game ");
-        return MENU_START_GAME;
-    }
-    else if (current_selected == MENU_CALIBRATE_MOTOR) {
-        return NODE1_CALIBRATING;
-    }
-    else if (current_selected == MENU_CALIBRATE_JOYSTICK) {
-        run_autocalibration();
-
-        menu_draw(); //TODO: Should be automated on page return.
-    }
-    else if (current_selected == MENU_CREDITS) {
-        // To be implemented
-        return NODE1_CREDITS;
-    }
-
-
-
-Sorry eivind
-void menu_select(directional_pos dir){
-    if (dir.up && selected > 0){
-        selected--;
-    }
-    else if (dir.down && selected < menu_cnt - 1){
-        selected++;
-    }
-}
-
-void menu_update(directional_pos dir)
-{
-    int8_t menu_direction = dir.up ? 1 : (dir.down ? -1 : 0);
-
-    // Move once per deflection; release or reverse to move again.
-    if (menu_direction != 0 && menu_direction != previous_menu_direction) {
-        uint8_t previous_selected = selected;
-        menu_select(dir);
-        if (selected != previous_selected) {
-            menu_draw();
-        }
-    }
-    previous_menu_direction = menu_direction;
-}
-*/

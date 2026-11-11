@@ -6,8 +6,6 @@
 #include <stdlib.h>
 
 
-
-
 // Algorithm for normalsation:
 //e.g 40 : 170
 // outer_margin = 1.05 
@@ -17,7 +15,6 @@
 //    -65 : 65
 // normalised = norm_input * (100/offsetted_max_value)
 
-// ----
 
 uint8_t OFFSET_VALUE_X;
 uint8_t MAX_ANALOG_VAL_X;
@@ -103,18 +100,6 @@ xy_signed joystick_normalise_input(xy_unsigned pos_xy) {
 
     return new_pos_xy;
 }
-
-
-#if 0
-//Currently not in use.
-const char *Direction[]={
-    "Up",
-    "Down",
-    "Left",
-    "Right",
-    "Neutral"
-};
-#endif 
 
 
 /**

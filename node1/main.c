@@ -1,5 +1,3 @@
-
-
 // Lib. Includes
 #include <stdint.h>
 #include <stdio.h>
@@ -73,25 +71,10 @@ ISR(INT0_vect) {
     can_message_pending_flag = 1;
 }
 
-/**
- * Wrapper to send can packets
- */
-void can_send(uint32_t id, uint8_t length, const uint8_t *data)
-{
-    canMsg tx = {
-        .id = id,
-        .length = length
-    };
-
-    for (uint8_t i = 0; i < length && i < 8; i++) {
-        tx.bytes[i] = data[i];
-    }
-
-    can_tx(tx);
-}
 
 /**
- * Gamelogic
+ * Gamelogic function.
+ * Continually called from main loop with a small delay.
  */
 void run_game(void) {
 
@@ -102,20 +85,18 @@ void run_game(void) {
     case NODE1_MENU:
         enum menuItems menu_choice = menu_update();
 
+        // If start game chosen: Change state to running and initialize game
         if (menu_choice == MENU_START_GAME) {
             printf_P(PSTR("Starting game\n\r"));
 
-
-
             uint8_t data[] = {1};
-            can_send(CAN_ID_GAMESTATE, 1, data);
+            can_send(CAN_ID_GAMESTATE, 1, data); // Send start came command to node 2
             
             current_gamestate = NODE1_RUNNING;
             hp_remaining = hp_max;
 
-             char hp_rem_char[2];
+            char hp_rem_char[2];
             snprintf(hp_rem_char, sizeof(hp_rem_char), "%u", hp_remaining);
-
 
             oled_reset();
             oled_print("Good luck");
@@ -126,23 +107,26 @@ void run_game(void) {
 
         }
 
+        // Send request to node 2 to autocalibrate the motor.
         else if (menu_choice == MENU_CALIBRATE_MOTOR) {
 
             uint8_t data[] = {1};
-            can_send(CAN_ID_SETTINGS, 1, data);
-
+            can_send(CAN_ID_SETTINGS, 1, data); // Send autocalibrate request to node 2
 
             current_gamestate = NODE1_CALIBRATING;
+
             printf_P(PSTR("Sending motor calibrating request\n\r"));
             oled_reset();
             oled_print("Waiting for Motor Calibration...");
         }
 
+        // Run joystick calibration sequence
         else if (menu_choice == MENU_CALIBRATE_JOYSTICK) {
             run_autocalibration();
             menu_init();
         }
 
+        // Show credits
         else if (menu_choice == MENU_CREDITS) {
             current_gamestate = NODE1_CREDITS;
             oled_reset();
@@ -159,20 +143,22 @@ void run_game(void) {
         }
         break;
 
+    // The RUNNING state checks current gamestate and updates node 2
     case NODE1_RUNNING:
 
-        // If SL7 pressed, stop game.
+        // If SL7 pressed, stop game and return to menu
         if (io_buttons.L7) {
             current_gamestate = NODE1_MENU;
 
             uint8_t data[] = {0};
-            can_send(CAN_ID_GAMESTATE, 1, data);
+            can_send(CAN_ID_GAMESTATE, 1, data); // Send stop game command to node 2
 
             printf_P(PSTR("Game stopped\n\r"));
 
             menu_init();
         }
 
+        // If SR5 pressed, send fire solenoid request to node 2
         else if (io_buttons.R5) {
             
             uint8_t data[] = {io_buttons.right};
@@ -181,17 +167,17 @@ void run_game(void) {
             
         }
 
-        // Send joystick and button info to node 1
+        // Send current joystick postition to node 2
         else {
             update_arm();
         }
     
         break;
 
-
-
+    // Wait state while motor is auto-calibrating
     case NODE1_CALIBRATING:
 
+        // Return to menu on joystick left or menu button
         if (dir == LEFT) {
             current_gamestate = NODE1_MENU;
             menu_init();
@@ -202,13 +188,14 @@ void run_game(void) {
         }
         break;
 
+    // Wait state to display score after game is over
     case NODE1_GAME_OVER:
   
+        // Return to menu on joystick left or menu button
         if (dir == LEFT) {
             current_gamestate = NODE1_MENU;
             menu_init();
         }
-        
         else if (io_buttons.L7) {
             current_gamestate = NODE1_MENU;
             menu_init();
@@ -228,6 +215,7 @@ void run_game(void) {
         }
         break;
 
+    // On unknown state, return to menu
     default:
         current_gamestate = NODE1_MENU;
         menu_init();
@@ -235,8 +223,16 @@ void run_game(void) {
     }
 }
 
+
+/**
+ * Function to handle incoming can packets.
+ * 
+ */
 void can_handler(canMsg *rx) {
     switch (rx->id) {
+
+    // Node 2 has experienced a game over.
+    // Change state to game over and display score
     case CAN_ID_GAMESTATE:
         if (rx->bytes[0] == 0) {
             last_game_score = rx->bytes[1];
@@ -255,29 +251,27 @@ void can_handler(canMsg *rx) {
         }
         break;
     
+    // Node 2 inform that the motor auto calibration is complete, return to menu.
     case CAN_ID_SETTINGS:
         printf_P(PSTR("Motor Calibration Complete\n\r"));
         current_gamestate = NODE1_MENU;
         menu_init();
         break; 
 
+    // Node 2 inform that a Hit Point has been lost, update remaining lives.
     case CAN_ID_HEALTH:
-       
-        
-        hp_remaining = rx->bytes[0]; // get hp count
-
+        hp_remaining = rx->bytes[0]; // get hp count from node 2
 
         oled_reset();
         oled_print("Lives Remaining: "); 
+
         char hp_text[4];
         snprintf(hp_text, sizeof(hp_text), "%u", hp_remaining);
         oled_print(hp_text);
-            
-
         break;
-        
+    
+    // On unknown can ID, do nothing
     default:
-        
         break;
     }
 }
@@ -298,16 +292,11 @@ int main(void) {
     // One time code, to see system start.:
     printf_P(PSTR("\n\r"));
     printf_P(PSTR("Hello There\n\r"));
-    //printf("GENERAL KENOBI!!\n\n\r");
 
-    // Run test functions here.
-    // Please delete test functions when no longer needed.
-    // Test functions to be used later can have a dedicated file in sandbox.
-
-   
     // Loop:
     while(1) {
 
+        // Handle can packet if recieved
         if (can_message_pending_flag) {
             canMsg rx;
             if (can_rx(&rx)) {
@@ -316,33 +305,10 @@ int main(void) {
             can_message_pending_flag = 0;
         }
 
+        // Run main game logic
         run_game();
         _delay_ms(50);
     };
 
     return 0;
 }
-
-
-/*
-        canMsg rx;
-        if (can_rx(&rx)) {
-            can_handler(&rx);
-        }
-
-
-
-    uint32_t counter = 0;
-    while (1) {
-
-        counter +=1;
-        printf("TESTING DIRECTIONAL TRANSLATION. %d \n\r", counter);
-        
-        xy_signed pos = read_joystick(0);
-        printf("X: %d -- Y: %d \n\r",pos.x,pos.y);
-
-        printf("DIRECTION ENUM:   %d \n\r", get_directional_basic());
-    
-        _delay_ms(500);
-    }
-*/

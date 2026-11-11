@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 
-
 // Pin definitions
 #define CAN_CS      PB1 // CAN slave !ChipSelect
 #define OLED_CS     PB3 // OLED slave !ChipSelect
@@ -28,6 +27,7 @@ void spi_deselect(void);
 uint8_t spi_transceive(uint8_t data);
 uint8_t spi_read(void);
 void spi_write(uint8_t data);
+
 void spi_transceive_bytes(spi_slave_t slave, 
                         const uint8_t* tx_data, 
                         uint8_t* rx_data, 

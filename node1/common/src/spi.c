@@ -1,10 +1,11 @@
+// spi.c
 
 #include <avr/io.h>
 #include "spi.h"
 
 
-/*
-Initialize the SPI communication.
+/**
+* Initialize the SPI communication.
 */
 void spi_init() {
 
@@ -35,9 +36,9 @@ void spi_init() {
 }
 
 
-/*
-This function set the target slave select pin LOW (active) 
-and all other slave select HIGH (deactivated)
+/**
+* This function set the target slave select pin LOW (active) 
+* and all other slave select HIGH (deactivated)
 */
 void spi_select(spi_slave_t slave) {
 
@@ -60,19 +61,19 @@ void spi_select(spi_slave_t slave) {
 }
 
 
-/*
-This function set all slave select pins HIGH (deactivated)
+/**
+* This function set all slave select pins HIGH (deactivated)
 */
 void spi_deselect(void) {
 
     // Set all ChipSelect signals HIGH (deactivated)
     PORTB |= (1 << CAN_CS) | (1 << OLED_CS) | (1 << IO_CS);
 }
-// hvis 1 sett 1 osv
 
-/*
-Send one byte over SPI and read received byte.
-This function is blocking until byte shift is complete.
+
+/**
+* Send one byte over SPI and read received byte.
+* This function is blocking until byte shift is complete.
 */
 uint8_t spi_transceive(uint8_t data) {
 
@@ -90,8 +91,8 @@ uint8_t spi_transceive(uint8_t data) {
 }
 
 
-/*
-Read data from slave by sending a dummy byte
+/**
+* Read data from slave by sending a dummy byte
 */
 uint8_t spi_read(void) {
 
@@ -102,8 +103,8 @@ uint8_t spi_read(void) {
 }
 
 
-/*
-Send data to slave without reading recieved data
+/**
+* Send data to slave without reading recieved data
 */
 void spi_write(uint8_t data) {
 

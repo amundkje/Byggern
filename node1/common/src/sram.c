@@ -1,9 +1,11 @@
+// sram.c
+
 #include <stdio.h>
 #include <avr/io.h>
-#include "../include/sram.h"
+#include "sram.h"
 
 /**
- * 
+ * Initialize sram
  */
 void sram_init(void) {   
      // Activate external memory Interface (XMEM)

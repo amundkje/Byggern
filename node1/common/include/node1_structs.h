@@ -1,7 +1,7 @@
 #ifndef NODE1_STRUCTS_H
 #define NODE1_STRUCTS_H
 
-#include <stdint.h> //Used for *int8_t
+#include <stdint.h> 
 
 
 // Can IDs
@@ -11,8 +11,6 @@
 #define CAN_ID_SETTINGS     15
 #define CAN_ID_IO_BUTTONS   20
 #define CAN_ID_ERROR        99 //Future :)
-
-
 
 
 // Struct representing the data in a CAN-frame
@@ -33,6 +31,7 @@ enum gameState {
     NODE1_ERROR
 };
 
+// Enumerated menu items
 enum menuItems {
     MENU_NONE = -1,
     MENU_START_GAME = 0,

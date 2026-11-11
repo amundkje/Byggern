@@ -1,6 +1,5 @@
 // uart.c
 
-
 #define F_CPU 4915200UL // Clock Speed
 
 #include <stdio.h>
@@ -11,7 +10,9 @@
 #define UBRR_VALUE ((F_CPU / 16UL / BAUD) - 1) //UL = Unsigned Long: Unsigned meaning n >= 0, and Long meaning 32bit
 
 
-// 
+/**
+ * Initialize uart communication
+ */
 void uart_init(void) {
 
     /* Set baud rate registers*/
@@ -24,14 +25,6 @@ void uart_init(void) {
     /* Set frame format: 8data, 2stop bit */
     UCSR0C = (1<<URSEL0)|(1<<USBS0)|(3<<UCSZ00);
 }
-
-
-
-
-
-
-
-
 
 
 /**

@@ -128,7 +128,7 @@ void mcp2515_write(uint8_t address, uint8_t data) {
 /**
  * Read multiple bytes without deactivating CS
  * mcp2515 automatically increment address for each byte requested
- * @note use can_message-t struct to handle pointer input
+ * @note use can_message_t struct to handle pointer input
  */
 void mcp2515_read_bytes(uint8_t start_address,
                         uint8_t* buffer,
