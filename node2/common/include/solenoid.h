@@ -8,5 +8,4 @@ void solenoid_trigger(void);
 void solenoid_update(void);
     
 
-
 #endif

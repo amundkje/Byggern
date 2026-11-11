@@ -1,7 +1,13 @@
+// ir.c
+
 #include "sam.h"
+#include "ir.h"
 
 #define IR_ADC_CHANNEL 7 // input A0 in arduino board
 
+/**
+ * Initialize ir reading with adc
+ */
 void ir_init(void) {
     // 1. Enable peripheral clock for ADC (Peripheral ID 37) in PMC
     PMC->PMC_PCER1 |= (1u << (ID_ADC - 32));
@@ -16,6 +22,10 @@ void ir_init(void) {
     ADC->ADC_CHER = (1u << IR_ADC_CHANNEL);
 }
 
+
+/**
+ * Read current ir level
+ */
 uint32_t ir_read(void) {
     // Start conversion via software trigger
     ADC->ADC_CR = ADC_CR_START;
@@ -26,6 +36,7 @@ uint32_t ir_read(void) {
     // Return the 12-bit conversion value
     return ADC->ADC_CDR[IR_ADC_CHANNEL];
 }
+
 /*
 To access and use the **ATSAM3X8E 12-bit Analog-to-Digital Converter (ADC)**, you must configure its power rails, enable its peripheral clock in the Power Management Controller (PMC), set up the ADC Mode Register, and read converted values from the channel data registers.
 

@@ -1,3 +1,5 @@
+// motor.c
+
 #include <stdint.h>
 
 #include "sam.h"
@@ -6,6 +8,9 @@
 #define PWM_PERIOD_TICKS 20000 // 20 ms, same as servo
 
 
+/**
+ * Initialize pwm for motor control
+ */
 void motor_init(void) {
     // Configer GPIO pin PC23 as output
     // This controls the direction of the motor
@@ -29,6 +34,12 @@ void motor_init(void) {
 }
 
 
+/**
+ * Set the motor to a given speed
+ * 
+ * @param speed_percent has a valid range [-100%, 100%]
+ * Negative percetage values makes motor go oposite way.
+ */
 void motor_set_speed(int8_t speed_percent) {
     // Keep input within legal range
     if (speed_percent < -100) speed_percent = -100;
@@ -52,6 +63,3 @@ void motor_set_speed(int8_t speed_percent) {
 }
 
 
-void motor_set_pos(int8_t pos_percent) {
-
-}

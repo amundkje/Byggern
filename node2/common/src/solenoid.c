@@ -1,6 +1,7 @@
+// solenoid.c
+
 #include "sam.h"
 #include "solenoid.h"
-
 
 #define SOLENOID_PIN        PIO_PC12 // Pin D51 on Arduino board 
 #define SOLENOID_PORT       PIOC
@@ -9,6 +10,9 @@
 static volatile uint8_t solenoid_timer = 0;
 
 
+/**
+ * Initialize pin used to fire solenoid
+ */
 void solenoid_init(void) {
     // Activate clk for PIOC
     PMC->PMC_PCER0 |= (1 << SOLENOID_ID);
@@ -24,6 +28,11 @@ void solenoid_init(void) {
 }
 
 
+/**
+ * Set fire pin low and set counter.
+ * @note the counter is handled in solenoid_update(),
+ * which decrement the counter every 10 ms and turns the fire signal off.
+ */
 void solenoid_trigger(void) {
     // Pull pin low to fire
     SOLENOID_PORT->PIO_CODR = SOLENOID_PIN;
@@ -34,6 +43,7 @@ void solenoid_trigger(void) {
 
 /**
  * @note this function is called at a set timer (10 ms)
+ * The same timer as pid_update
  */
 void solenoid_update(void) {
     // Deactivate solenoid after set time

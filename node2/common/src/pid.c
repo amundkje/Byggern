@@ -1,3 +1,5 @@
+// pid.c
+
 #include <stdint.h>
 #include "sam.h"
 #include "pid.h"
@@ -5,6 +7,8 @@
 #include "encoder.h"
 
 // PI controller weigths
+// These varied a lot based on the hardware. 
+// Some motors had more resistance to movment
 static float Kp = 0.04f; // Experimetally found
 static float Ki = 0.05f; // Experimetally found
 static float dt = 0.01f; // 10 ms sampletime
@@ -24,6 +28,9 @@ static uint8_t pid_enabled = 0;
 #define MOTOR_CALIBRATE_SPEED           40
 
 
+/**
+ * Set PI controller weights
+ */
 void pid_init(float kp, float ki, float sample_time_sec) {
     Kp = kp;
     Ki = ki;
@@ -32,7 +39,11 @@ void pid_init(float kp, float ki, float sample_time_sec) {
 
 }
 
-// Used to generate periodic interrupt to run pid controller
+/**
+ * Initialize timer with capture/compare interrrupt
+ *  
+ * Used to generate periodic interrupt to run pid controller
+ */
 void pid_TC0_timer_init(void) {
 
     // Activate TC0 peripheral clock
@@ -86,11 +97,11 @@ void pid_set_refrence(int32_t encoder_value) {
 /**
  * Automatically reset position of motor to center
  */
-void pid_center_motor(void) {
+void pid_center_motor(void) { // TODO: Extract
     pid_set_refrence(encoder_max / 2);
 
     pid_set_enable(1);
-    while (abs(refrence_pos - encoder_read()) > 20);
+    while (abs(refrence_pos - encoder_read()) > 20); // This is not good enough
     pid_set_enable(0);
 }
 

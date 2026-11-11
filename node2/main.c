@@ -39,10 +39,9 @@ enum gameState {
     NODE2_RESETTING
 };
 
+// Game logic
 enum gameState current_gamestate = NODE2_IDLE;
 static volatile  uint8_t calibrated_flag = 0;
-
-
 
 // Variables for safe data receive during CAN interrupt
 static volatile int8_t latest_joystic_x = 0;
@@ -50,7 +49,7 @@ static volatile int8_t latest_joystic_y = 0;
 static volatile uint8_t solenoid_fire_request = 0;
 static volatile uint8_t game_stopped_flag = 0;
 
-
+// IR and lives variables
 static volatile uint32_t IR_rest_val = 2000; 
 static volatile uint8_t IR_below_threshold_count = 0; 
 static volatile uint8_t hp_loss_max = 3;
@@ -58,8 +57,11 @@ static volatile uint8_t hp_loss_count = 0;
 static volatile uint8_t ball_reset_count = 0;
 static volatile uint8_t IR_THRESHOLD_MULTIPLIER = 6;
 
-void init(void) {
 
+/**
+ * Initialize node 2
+ */
+void init(void) {
 
     SystemInit();
 
@@ -100,6 +102,8 @@ void init(void) {
     encoder_init();
 
     ir_init();
+
+    // Calibrate IR level
     delay_by_counting(500000);
     IR_rest_val = ir_read();
     IR_DETECT_THRESHOLD = IR_rest_val * 0.6;
@@ -109,15 +113,12 @@ void init(void) {
 
     solenoid_init();
 
-    pid_TC0_timer_init();
-
-
+    pid_TC0_timer_init(); 
 
 }
 
 
-
-// For debug purposes
+// For debug purposes. Copied from can.c, but changed to int
 void can_printmsg_int(CanMsg m){
     printf("CanMsg(id:%d, length:%d, data:{", m.id, m.length);
     if(m.length){
@@ -130,6 +131,24 @@ void can_printmsg_int(CanMsg m){
 }
 
 
+/**
+ * Wrapper to send can packets
+ * @param data Prepare a list: (data[] = {1,2,3})
+ */
+void can_send(uint32_t id, uint8_t length, const uint8_t *data)
+{
+    CanMsg tx = {
+        .id = id,
+        .length = length
+    };
+
+    for (uint8_t i = 0; i < length && i < 8; i++) {
+        tx.byte[i] = data[i];
+    }
+
+    can_tx(tx);
+}
+
 
 /**
  * Handle Game over
@@ -140,25 +159,25 @@ void game_over(uint8_t score) {
     current_gamestate = NODE2_RESETTING;
 
     // Tell node1 the game is over
-    CanMsg tx = {
-        .id = CAN_ID_GAMESTATE,
-        .length = 2,
-        .byte = {0, score}
-    };
-    can_tx(tx);
+    uint8_t data[] = {0, score};
+    can_send(CAN_ID_GAMESTATE, 2, data);
 
     printf("Game Over\n\r");
 
     current_gamestate = NODE2_RESETTING;
 }
 
+
 /**
  * Can bus handler -CANHANDLER
+ * @note tThis function is called on rx interrupt
  */
 void can_handler(CanMsg *rx) {
 
     // Check received can id 
     switch (rx->id) {
+
+    // Start or stop game based on the first data byte
     case CAN_ID_GAMESTATE:
         // for debug
         //can_printmsg(*rx);
@@ -182,6 +201,7 @@ void can_handler(CanMsg *rx) {
         }
         break;
 
+    // Joystick position recieved
     case CAN_ID_JOYSTICK:
         // For debug
         // can_printmsg_int(*rx);
@@ -192,11 +212,13 @@ void can_handler(CanMsg *rx) {
 
         break;
 
+    // Button states recieved
     case CAN_ID_IO_BUTTONS:
         printf("Fire signal received\n\r");
         solenoid_fire_request = 1;
 
-        /*
+        // TODO: button mask in case other buttons are needed
+        /* 
         // Check Solenoid fire command received 
         if (rx->byte[0] & SOLENOID_BUTTON) { 
             printf("Fire signal received\n\r");
@@ -213,6 +235,7 @@ void can_handler(CanMsg *rx) {
     case CAN_ID_HEALTH:
         break;
 
+    // Motor auto claibration request recieved
     case CAN_ID_SETTINGS:
         if (rx->byte[0] == 1) {
             current_gamestate = NODE2_CALIBRATING;
@@ -224,8 +247,10 @@ void can_handler(CanMsg *rx) {
     }
 }
 
+
 /**
- * Game running function
+ * Main Game Logic function
+ * Continually called from main loop
  */
 void update_game(void) {
 
@@ -234,11 +259,15 @@ void update_game(void) {
         // Wait for start command
         break;
 
+    // Control outputs based on inputs
     case NODE2_RUNNING:
 
+        // Safety functionallity. Unable to start game before motor is calibrated
         if (!calibrated_flag) {
             printf("Run Motor Calibration please!\n\r");
             current_gamestate = NODE2_IDLE;
+            uint8_t data[] = {0};
+            can_send(CAN_ID_GAMESTATE, 1, data); // Tell node 1 to return to menu
             break;
         }
 
@@ -254,38 +283,37 @@ void update_game(void) {
         }
 
 
-
-
         //TODO: extract!!
+        // If ball breaks IR line, trigger HP loss and stop game until ball removed.
+        // Line need to be continually broken for multiple reading to trigger. (bcs of noise)
         if (IR_below_threshold_count >= 5) { //Confirmed Trigger: 
+
+            // Ball broken IR line, handle HP loss
+            IR_below_threshold_count = 0;
             hp_loss_count++;
             uint8_t current_hp = hp_loss_max-hp_loss_count;
             printf("HP:   %d \n\r",current_hp);
 
-             CanMsg tx = { //TODO: extract into a wrapper method?
-            .id = CAN_ID_HEALTH ,
-            .length = 1,
-            .byte = {current_hp}
-            }; can_tx(tx);
+            // Send lives remaining to node 1
+            uint8_t data[] = {current_hp};
+            can_send(CAN_ID_HEALTH, 1, data);
         
-
             printf("You failed! -1 HP\n\r");
 
-
-
-            IR_below_threshold_count = 0;
-
-
-
+            
+            // Check if game over
             if (hp_loss_count >= hp_loss_max) {
                 hp_loss_count = 0; // Reset HP count
                 game_over(0);
             } 
+
+
+            // Stop game untill ball is removed.
+            // Multiple reading of ball removed needed to avoid false restarts.       
             printf("Remove ball \r\n");
-               
+
             while(1){  //DO NOTHING :)
                 uint32_t read = ir_read();
-                // printf("IR lazy: %d \n\r",read);
                 if (read >= IR_DETECT_THRESHOLD) {
                     ball_reset_count++;
                 } else ball_reset_count = 0;
@@ -296,6 +324,8 @@ void update_game(void) {
             }
         }
 
+
+        // Check IR line broken and update counter.
         uint32_t read = ir_read();
         // printf("IR running: %d \n\r",read);
         // printf("IR_VALUE: %d \n\r",read);
@@ -305,54 +335,50 @@ void update_game(void) {
             // printf("IR Threshold:  %d\n\r", IR_below_threshold_count);
         } else IR_below_threshold_count = 0;
 
-
-
-        
-        
-        
-
         break;
+
 
     case NODE2_ERROR:
         
         break;
 
+    // Motor autocalibrating sequence on entering this state
     case NODE2_CALIBRATING:
 
         motor_calibrate();
-                //debug
+
         calibrated_flag = 1;
         current_gamestate = NODE2_IDLE;
 
-        CanMsg tx = {
-            .id = CAN_ID_SETTINGS,
-            .length = 0,
-            .byte = {}
-        };
-        can_tx(tx);
+        // Tell node 1 auto calibration complete
+        uint8_t data[] = {};
+        can_send(CAN_ID_SETTINGS, 0, data);
 
         printf("Sent calibration OK\n\r");
 
         break;
 
+    
     case NODE2_RESETTING:
-        /* Need integrator part first
+        // TODO: Automatic return to senter to be implemented
+        /* 
         printf("Reseting Motor to Center...\n\r");
         pid_center_motor();
         printf("Motor Centering Complete\n\r");
         */
-       pid_set_enable(0);
+        pid_set_enable(0);
         current_gamestate = NODE2_IDLE;
         
         break;
     
+    // On unknown state, return to idle
     default:
         current_gamestate = NODE2_IDLE;
         break;
     }
 
-
 }
+
 
 /**
  * This function is called by timer interrupt
@@ -365,9 +391,10 @@ void TC0_Handler(void) {
 
     if (status & TC_SR_CPCS) {
         pid_update(); // Run PID regulator at periodic intervals
-        solenoid_update();
+        solenoid_update(); // Check solenoid reset
     }
 }
+
 
 /**
  * Interrupt Service Routine
@@ -392,16 +419,13 @@ int main()
     printf("GENERAL KENOBI\n\r");
     printf("*COUGH*\n\n\r");
 
-    // Testfunctions here:
-
-
-
-
     // Main loop
     while (1)
     {
         update_game(); // Main game function
-        delay_by_counting(300000);
+
+        // TODO: Implement better delay
+        delay_by_counting(300000); // Dummy delay
 
     }
 

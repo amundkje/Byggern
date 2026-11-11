@@ -1,3 +1,4 @@
+// servo.c
 
 #include <stdint.h>
 
@@ -12,6 +13,9 @@
 #define SERVO_MAX_TICKS     2100    // 2.1 ms (+100%) 
 
 
+/**
+ * Initialize the pwm used to control the servo
+ */
 void servo_init(void) {
 
     // Activate PWM peripheral (ID_PWN=36)
@@ -40,6 +44,9 @@ void servo_init(void) {
 }
 
 
+/**
+ * Set servo position by changing the duty-cycle of the pwm signal
+ */
 void servo_set_pos(int8_t position_percentage) {
 
     // Make sure in data is inside range

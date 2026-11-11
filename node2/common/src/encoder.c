@@ -1,11 +1,13 @@
+// encoder.c
 #include <stdint.h>
 
 #include "sam.h"
 #include "encoder.h"
 
 
-
-
+/**
+ * Initialize the encoder
+ */
 void encoder_init(void) {
     // Encoder is read on TC2 (Timer Counter)
 
