@@ -180,7 +180,7 @@ uint8_t mcp2515_read_status(void) {
     spi_write(MCP_READ_STATUS);
     uint8_t status = spi_read();
     spi_deselect();
-
+    return status;
 }
 
 

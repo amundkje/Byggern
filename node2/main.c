@@ -319,6 +319,7 @@ void update_game(void) {
                 } else ball_reset_count = 0;
 
                 if (ball_reset_count >= 5) {
+                    ball_reset_count = 0;
                     break;
                 }
             }
